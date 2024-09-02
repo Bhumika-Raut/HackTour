@@ -4,7 +4,7 @@ function Home() {
   const [hackData, setHackData] = useState(null);
 
   useEffect(() => {
-    fetch('https://hacktour.onrender.com/random')
+    fetch('https://hacktour.onrender.com/home')
       .then(response => response.json())
       .then(data => setHackData(data))
       .catch(error => console.error('Error fetching data:', error));

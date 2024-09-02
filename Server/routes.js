@@ -17,7 +17,7 @@ router.get('/tech', async (req, res) => {
         res.status(500).json({ error: 'Internal Server Error' }); 
     }
 });
-router.get('/random', async (req, res) => {
+router.get('/home', async (req, res) => {
     try {
         const random = await RandomEntity.find().limit(2000).exec(); 
         res.json(random);
