@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 function Home() {
   const [hackData, setHackData] = useState([]);
 
-  // Function to shuffle an array
+  
   const shuffleArray = (array) => {
     return array.sort(() => Math.random() - 0.5);
   };
@@ -13,7 +13,7 @@ function Home() {
       .then(response => response.json())
       .then(data => {
         console.log(data);
-        setHackData(shuffleArray(data)); // Shuffle data before setting it to state
+        setHackData(shuffleArray(data)); 
       })
       .catch(error => console.error('Error fetching data:', error));
   }, []);
