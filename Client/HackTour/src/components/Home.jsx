@@ -9,20 +9,42 @@ function Home() {
   };
 
   useEffect(() => {
+    // Fetch data from the backend
     fetch('https://hacktour.onrender.com/home')
       .then(response => response.json())
       .then(data => {
-        console.log(data);
-        setHackData(shuffleArray(data)); 
+        console.log('Fetched data:', data);
+        setHackData(shuffleArray(data)); // Shuffle and set data
       })
       .catch(error => console.error('Error fetching data:', error));
   }, []);
 
   // Function to handle likes
-  const handleLike = (index) => {
-    const updatedData = [...hackData];
-    updatedData[index].likes = (updatedData[index].likes || 0 + 1);
-    setHackData(updatedData);
+  const handleLike = async (id, index) => {
+    try {
+      // Send a POST request to increment the like count for the specific entity
+      const response = await fetch(`https://hacktour.onrender.com/like/${id}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
+      const data = await response.json();
+
+      console.log('Updated data from server:', data); // Log the server response
+
+      if (response.ok) {
+        // Create a new updated array to avoid mutating the state
+        const updatedData = hackData.map((item, idx) =>
+          idx === index ? { ...item, likes: data.likes } : item
+        );
+        setHackData(updatedData);
+      } else {
+        console.error('Error updating like:', data.error);
+      }
+    } catch (err) {
+      console.error('Error in handleLike:', err);
+    }
   };
 
   return (
@@ -31,7 +53,7 @@ function Home() {
       {hackData.length > 0 ? (
         <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6'>
           {hackData.map((item, index) => (
-            <div key={index} className='bg-gray-800 p-6 rounded-lg shadow-lg relative'>
+            <div key={item._id} className='bg-gray-800 p-6 rounded-lg shadow-lg relative'>
               <h2 className='text-xl font-semibold mb-2 text-white'>{item.title}</h2>
               <img 
                 src={item.image} 
@@ -42,14 +64,12 @@ function Home() {
               {/* Like and Heart Buttons */}
               <div className="flex justify-end mt-4 absolute bottom-4 right-4">
                 <button 
-                  onClick={() => handleLike(index)} 
+                  onClick={() => handleLike(item._id, index)} // Pass the ID and index
                   className='text-2xl mr-4'
                 >
-                   {item.likes || 0 }👍
+                  👍 {item.likes || 0}
                 </button>
-                <button 
-                  className='text-2xl'
-                >
+                <button className='text-2xl'>
                   ❤️
                 </button>
               </div>
@@ -64,6 +84,3 @@ function Home() {
 }
 
 export default Home;
-
-
-

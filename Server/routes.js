@@ -1,15 +1,13 @@
 const express = require('express');
 const router = express.Router();
 const TechEntity = require('./schema'); 
-const LikeEntity = require('./likeSchema');
 const RandomEntity = require('./randomSchema'); 
-
 const cors = require('cors');
 
 router.use(express.json());
 router.use(cors());
 
-// GET route for tech data
+
 router.get('/tech', async (req, res) => {
     try {
         const tech = await TechEntity.find().limit(2000).exec(); 
@@ -20,7 +18,7 @@ router.get('/tech', async (req, res) => {
     }
 });
 
-// GET route for home data
+
 router.get('/home', async (req, res) => {
     try {
         const random = await RandomEntity.find().limit(2000).exec(); 
@@ -31,19 +29,19 @@ router.get('/home', async (req, res) => {
     }
 });
 
-// POST route to handle likes
+
 router.post('/like/:id', async (req, res) => {
     try {
-        const { id } = req.params; // Get the entity ID from request params
-        const entity = await RandomEntity.findById(id); // Find the entity by ID
+        const { id } = req.params; 
+        const entity = await RandomEntity.findById(id); 
 
         if (!entity) {
             return res.status(404).json({ error: 'Entity not found' });
         }
 
-        // Increment the like count
+        
         entity.likes = (entity.likes || 0) + 1;
-        await entity.save(); // Save the updated entity
+        await entity.save(); 
 
         res.json({ message: 'Like updated successfully', likes: entity.likes });
     } catch (err) {
