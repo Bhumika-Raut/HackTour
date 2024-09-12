@@ -1,23 +1,8 @@
-// import React from 'react'
-// import Navbar from './components/Navbar'
-// import Home from './components/Home'
-
-// function App() {
-//   return (
-//     <>
-//     <Navbar/>
-//     <Home/>
-//     </>
-//   )
-// }
-
-// export default App
-
-
 import React, { useState } from "react";
+import { BrowserRouter as Router, Route, Switch } from "react-router-dom";
 import Navbar from "./components/Navbar";
-import Home from './components/Home'
-
+import Home from './components/Home';
+import Saved from "./components/Saved";
 
 function App() {
   const [theme, setTheme] = useState("light");
@@ -28,15 +13,18 @@ function App() {
   };
 
   return (
-    <div className={theme === "dark" ? "bg-black text-white min-h-screen" : "bg-white text-black min-h-screen"}>
-      <Navbar onToggleTheme={toggleTheme} />
-      <div className="homepage-content">
-        {/* Your homepage content */}
-        <Home/>
+    <Router>
+      <div className={theme === "dark" ? "bg-black text-white min-h-screen" : "bg-white text-black min-h-screen"}>
+        <Navbar onToggleTheme={toggleTheme} />
+        <div className="homepage-content">
+          <Switch>
+            <Route exact path="/" component={Home} />
+            <Route path="/saved" component={Saved} />
+          </Switch>
+        </div>
       </div>
-    </div>
+    </Router>
   );
 }
 
 export default App;
-
