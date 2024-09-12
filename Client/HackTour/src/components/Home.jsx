@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
+import { useHistory } from 'react-router-dom';
 
 function Home() {
   const [hackData, setHackData] = useState([]);
+  const history = useHistory();
 
   // Shuffle the hackData
   const shuffleArray = (array) => {
@@ -39,6 +41,17 @@ function Home() {
           idx === index ? { ...item, likes: data.likes } : item
         );
         setHackData(updatedData);
+
+        // Save the liked entity
+        await fetch(`https://hacktour.onrender.com/saved/${id}`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        });
+
+        // Redirect to saved page
+        history.push('/saved');
       } else {
         console.error('Error updating like:', data.error);
       }
@@ -67,7 +80,7 @@ function Home() {
                   onClick={() => handleLike(item._id, index)} // Pass the ID and index
                   className='text-2xl mr-4'
                 >
-                  👍 {item.likes || 0}
+                  {item.likes || 0}👍 
                 </button>
                 <button className='text-2xl'>
                   ❤️
