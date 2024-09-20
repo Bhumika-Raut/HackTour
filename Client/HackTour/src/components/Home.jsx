@@ -1,9 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { useHistory } from 'react-router-dom';
 
-function Home() {
+function Home({ onSave }) {  // Accept onSave function as a prop
   const [hackData, setHackData] = useState([]);
-  const history = useHistory();
 
   // Shuffle the hackData
   const shuffleArray = (array) => {
@@ -41,17 +39,6 @@ function Home() {
           idx === index ? { ...item, likes: data.likes } : item
         );
         setHackData(updatedData);
-
-        // Save the liked entity
-        await fetch(`https://hacktour.onrender.com/saved/${id}`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          }
-        });
-
-        // Redirect to saved page
-        history.push('/saved');
       } else {
         console.error('Error updating like:', data.error);
       }
@@ -74,15 +61,18 @@ function Home() {
                 className='w-full h-48 object-cover mb-4 rounded-md' 
               />
               <p className='text-white'>{item.description}</p>
-              {/* Like and Heart Buttons */}
+              {/* Like and Save Buttons */}
               <div className="flex justify-end mt-4 absolute bottom-4 right-4">
                 <button 
                   onClick={() => handleLike(item._id, index)} // Pass the ID and index
                   className='text-2xl mr-4'
                 >
-                  {item.likes || 0}👍 
+                  {item.likes || 0} 👍 
                 </button>
-                <button className='text-2xl'>
+                <button 
+                  onClick={() => onSave(item)} // Save the item when ❤️ is clicked
+                  className='text-2xl'
+                >
                   ❤️
                 </button>
               </div>
