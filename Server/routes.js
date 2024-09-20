@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const TechEntity = require('./schema'); 
 const RandomEntity = require('./randomSchema'); 
-const SavedEntity = require('./savedSchema'); // Make sure this schema is defined
+const SavedEntity = require('./savedSchema'); 
 const cors = require('cors');
 
 router.use(express.json());
