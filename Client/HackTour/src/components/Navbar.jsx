@@ -1,13 +1,12 @@
 import React from "react";
 import { Link } from "react-router-dom";
 
-function Navbar({ onToggleTheme }) {
+function Navbar({ onToggleTheme, user }) {
   const navItems = (
     <>
       <li><Link to="/">Home</Link></li>
       <li><Link to="/account">Account</Link></li>
       <li><Link to="/saved">Saved</Link></li>
-      <Link to="/account" className="text-white">Profile</Link>
     </>
   );
 
@@ -48,6 +47,15 @@ function Navbar({ onToggleTheme }) {
               </svg>
             </label>
           </div>
+
+          {/* Profile Image */}
+          {user && user.profileImage && (
+            <div className="ml-4">
+              <Link to="/account">
+                <img src={user.profileImage} alt="Profile" className="h-10 w-10 rounded-full border-2 border-white" />
+              </Link>
+            </div>
+          )}
         </div>
       </div>
     </div>

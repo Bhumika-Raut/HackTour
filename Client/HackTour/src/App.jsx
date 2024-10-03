@@ -14,7 +14,7 @@ function App() {
 
   return (
     <Router>
-      <div className={theme === "dark" ? "bg-black text-white min-h-screen" : "bg-white text-black min-h-screen"}>
+      <div className={`min-h-screen ${theme === "dark" ? "bg-black text-white" : "bg-white text-black"}`}>
         <Navbar onToggleTheme={toggleTheme} /> {/* Pass toggleTheme to Navbar */}
         <div className="homepage-content">
           <Routes>
