@@ -9,13 +9,22 @@ function Home({ onSave }) {
 
   useEffect(() => {
     fetch('https://hacktour.onrender.com/home')
-      .then(response => response.json())
+      .then(response => {
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        return response.json();
+      })
       .then(data => {
         console.log('Fetched data:', data);
         setHackData(shuffleArray(data));
       })
-      .catch(error => console.error('Error fetching data:', error));
+      .catch(error => {
+        console.error('Error fetching data:', error);
+        setHackData([]); // Set to empty array in case of error to avoid undefined issues
+      });
   }, []);
+  
 
   const handleLike = async (id, index) => {
     try {
@@ -40,7 +49,6 @@ function Home({ onSave }) {
     }
   };
 
-  // Function to handle saving an item
   const handleSave = async (item) => {
     try {
       const response = await fetch(`https://hacktour.onrender.com/saved/${item._id}`, {

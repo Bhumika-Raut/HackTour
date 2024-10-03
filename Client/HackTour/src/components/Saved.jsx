@@ -4,7 +4,6 @@ function Saved() {
   const [savedData, setSavedData] = useState([]);
 
   useEffect(() => {
-    // Fetch saved items from backend
     fetch('https://hacktour.onrender.com/saved')
       .then(response => response.json())
       .then(data => {
