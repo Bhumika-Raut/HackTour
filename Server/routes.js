@@ -79,14 +79,14 @@ router.post('/saved/:id', async (req, res) => {
 router.post('/saved/:id', async (req, res) => {
     try {
         const { id } = req.params;
-        const entity = await RandomEntity.findById(id);  // Find the entity by ID
+        const entity = await RandomEntity.findById(id);  
 
         if (!entity) {
             return res.status(404).json({ error: 'Entity not found' });
         }
 
-        const savedEntity = new SavedEntity(entity.toObject());  // Copy the data
-        await savedEntity.save();  // Save to the Saved collection
+        const savedEntity = new SavedEntity(entity.toObject());  
+        await savedEntity.save();  
 
         res.json({ message: 'Entity saved successfully' });
     } catch (err) {
@@ -94,5 +94,19 @@ router.post('/saved/:id', async (req, res) => {
         res.status(500).json({ error: 'Internal Server Error' });
     }
 });
+
+// Example endpoint in your server.js or routes file
+router.get('/account', async (req, res) => {
+    try {
+        const userId = req.user.id; // Get the user ID from the request (e.g., from session)
+        const user = await User.findById(userId);
+        const savedHacks = await SavedHack.find({ userId }); // Assuming saved hacks are linked to the user
+        res.json({ user, savedHacks });
+    } catch (err) {
+        console.error('Error fetching account data', err);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
+
 
 module.exports = router;
