@@ -7,6 +7,7 @@ function Navbar({ onToggleTheme }) {
       <li><Link to="/">Home</Link></li>
       <li><Link to="/account">Account</Link></li>
       <li><Link to="/saved">Saved</Link></li>
+      <Link to="/account" className="text-white">Profile</Link>
     </>
   );
 

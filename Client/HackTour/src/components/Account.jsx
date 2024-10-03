@@ -1,54 +1,102 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 
 function Account() {
-  const [user, setUser] = useState(null);
-  const [savedHacks, setSavedHacks] = useState([]);
+  const [name, setName] = useState('');
+  const [password, setPassword] = useState('');
+  const [profileImage, setProfileImage] = useState(null);
+  const [isSignedUp, setIsSignedUp] = useState(false); // State to track signup status
+  const [greeting, setGreeting] = useState('');
 
-  // Fetch user information and saved hacks
-  useEffect(() => {
-    // Replace with your actual API endpoint to fetch user data
-    fetch('https://hacktour.onrender.com/account')
-      .then(response => {
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        return response.json();
-      })
-      .then(data => {
-        setUser(data.user); // Assuming the API returns a user object
-        setSavedHacks(data.savedHacks); // Assuming saved hacks are included in the response
-      })
-      .catch(error => {
-        console.error('Error fetching account data:', error);
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setProfileImage(URL.createObjectURL(file)); // Create a URL for the selected image
+    }
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    const userData = {
+      name,
+      password,
+      profileImage,
+    };
+
+    try {
+      const response = await fetch('http://localhost:5000/api/signup', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(userData),
       });
-  }, []);
+
+      if (response.ok) {
+        const data = await response.json();
+        setGreeting(`Hello ${data.user.name}, nice to meet you!`);
+        setIsSignedUp(true);
+      } else {
+        throw new Error('Signup failed');
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  };
 
   return (
-    <div className="max-w-screen-2xl container mx-auto px-16 md:px-20 px-3">
-      <h1 className="text-3xl font-bold text-center mb-6">Account</h1>
-      {user ? (
-        <div className="bg-gray-800 p-6 rounded-lg shadow-lg">
-          <h2 className="text-xl font-semibold mb-4 text-white">User Information</h2>
-          <p className="text-white">Name: {user.name}</p>
-          <p className="text-white">Email: {user.email}</p>
-        </div>
+    <div className="max-w-md mx-auto p-4">
+      {isSignedUp ? (
+        <h2 className="text-2xl">{greeting}</h2> // Display greeting if signed up
       ) : (
-        <p className="text-white">Loading user information...</p>
-      )}
-
-      <h2 className="text-xl font-semibold mb-4 text-white mt-8">Saved Hacks</h2>
-      {savedHacks.length > 0 ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {savedHacks.map(hack => (
-            <div key={hack._id} className="bg-gray-700 p-4 rounded-lg shadow-lg">
-              <h3 className="text-lg font-semibold text-white">{hack.title}</h3>
-              <img src={hack.image} alt={hack.title} className="w-full h-32 object-cover mb-2 rounded-md" />
-              <p className="text-white">{hack.description}</p>
+        <>
+          <h2 className="text-2xl mb-4">Create Account / Signup</h2>
+          <form onSubmit={handleSubmit}>
+            <div className="mb-4">
+              <label htmlFor="name" className="block mb-1">Name:</label>
+              <input
+                type="text"
+                id="name"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                required
+                className="border rounded p-2 w-full"
+              />
             </div>
-          ))}
-        </div>
-      ) : (
-        <p className="text-white">No saved hacks found.</p>
+            <div className="mb-4">
+              <label htmlFor="password" className="block mb-1">Password:</label>
+              <input
+                type="password"
+                id="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                className="border rounded p-2 w-full"
+              />
+            </div>
+            <div className="mb-4">
+              <label htmlFor="profileImage" className="block mb-1">Profile Image:</label>
+              <input
+                type="file"
+                id="profileImage"
+                accept="image/*"
+                onChange={handleImageChange}
+                className="border rounded p-2 w-full"
+              />
+            </div>
+            {profileImage && (
+              <div className="mb-4">
+                <img src={profileImage} alt="Profile Preview" className="w-24 h-24 rounded-full" />
+              </div>
+            )}
+            <button
+              type="submit"
+              className="bg-blue-500 text-white rounded px-4 py-2"
+            >
+              Signup
+            </button>
+          </form>
+        </>
       )}
     </div>
   );
