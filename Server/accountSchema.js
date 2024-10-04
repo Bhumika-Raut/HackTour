@@ -10,8 +10,8 @@ const accountSchema = new mongoose.Schema({
         required: true,
     },
     profileImage: {
-        type: String, // This will store the URL of the profile image
-    },
+        type: String, 
+    }
 });
 
 const Account = mongoose.model('Account', accountSchema);
