@@ -15,7 +15,7 @@ router.get('/tech', async (req, res) => {
         const tech = await TechEntity.find().limit(2000).exec(); 
         res.json(tech);
     } catch (err) {
-        console.log('Error in GET tech request', err);
+        console.error('Error in GET tech request', err);
         res.status(500).json({ error: 'Internal Server Error' }); 
     }
 });
@@ -26,7 +26,7 @@ router.get('/home', async (req, res) => {
         const random = await RandomEntity.find().limit(2000).exec(); 
         res.json(random);
     } catch (err) {
-        console.log('Error in GET random request', err);
+        console.error('Error in GET random request', err);
         res.status(500).json({ error: 'Internal Server Error' }); 
     }
 });
@@ -37,7 +37,7 @@ router.get('/saved', async (req, res) => {
         const saved = await SavedEntity.find().limit(2000).exec();
         res.json(saved);
     } catch (err) {
-        console.log('Error in GET saved request', err);
+        console.error('Error in GET saved request', err);
         res.status(500).json({ error: 'Internal Server Error' }); 
     }
 });
@@ -57,7 +57,7 @@ router.post('/like/:id', async (req, res) => {
 
         res.json({ message: 'Like updated successfully', likes: entity.likes });
     } catch (err) {
-        console.log('Error in POST like request', err);
+        console.error('Error in POST like request', err);
         res.status(500).json({ error: 'Internal Server Error' });
     }
 });
@@ -77,7 +77,7 @@ router.post('/saved/:id', async (req, res) => {
 
         res.json({ message: 'Entity saved successfully' });
     } catch (err) {
-        console.log('Error in POST saved request', err);
+        console.error('Error in POST saved request', err);
         res.status(500).json({ error: 'Internal Server Error' });
     }
 });
@@ -99,7 +99,7 @@ router.post('/signup', async (req, res) => {
 
         res.status(201).json({ message: 'Account created successfully' });
     } catch (err) {
-        console.log('Error in POST signup request', err);
+        console.error('Error in POST signup request', err);
         res.status(500).json({ error: 'Internal Server Error' });
     }
 });
