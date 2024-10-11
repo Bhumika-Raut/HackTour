@@ -1,102 +1,93 @@
 import React, { useState } from 'react';
+import axios from 'axios';
 
 function Account() {
   const [name, setName] = useState('');
   const [password, setPassword] = useState('');
   const [profileImage, setProfileImage] = useState(null);
-  const [isSignedUp, setIsSignedUp] = useState(false); // State to track signup status
+  const [isSignedUp, setIsSignedUp] = useState(false);
   const [greeting, setGreeting] = useState('');
+  const [error, setError] = useState('');
 
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
-      setProfileImage(URL.createObjectURL(file)); // Create a URL for the selected image
+      setProfileImage(URL.createObjectURL(file)); // Preview image
     }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    const userData = {
-      name,
-      password,
-      profileImage,
-    };
-
     try {
-      const response = await fetch('http://localhost:5000/api/signup', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(userData),
+      const formData = new FormData();
+      formData.append('name', name);
+      formData.append('password', password);
+      formData.append('profileImage', profileImage || '');
+
+      // Send POST request to signup
+      const response = await axios.post('http://localhost:5000/signup', { 
+        name, 
+        password, 
+        profileImage: profileImage || '' // Profile image is optional
       });
 
-      if (response.ok) {
-        const data = await response.json();
-        setGreeting(`Hello ${data.user.name}, nice to meet you!`);
-        setIsSignedUp(true);
-      } else {
-        throw new Error('Signup failed');
-      }
-    } catch (error) {
-      console.error(error);
+      setGreeting(`Welcome, ${name}!`);
+      setIsSignedUp(true);
+      setError(''); // Clear any errors
+    } catch (err) {
+      setError(err.response?.data?.error || 'Signup failed');
     }
   };
 
   return (
-    <div className="max-w-md mx-auto p-4">
+    <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-r from-green-300 via-purple-500 to-purple-600">
+      <h1 className="text-4xl font-bold text-white mb-4 animate-bounce">Account</h1>
+
       {isSignedUp ? (
-        <h2 className="text-2xl">{greeting}</h2> // Display greeting if signed up
+        <div className="text-xl text-white mt-4 animate-fadeIn">{greeting}</div>
       ) : (
-        <>
-          <h2 className="text-2xl mb-4">Create Account / Signup</h2>
-          <form onSubmit={handleSubmit}>
-            <div className="mb-4">
-              <label htmlFor="name" className="block mb-1">Name:</label>
-              <input
-                type="text"
-                id="name"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                required
-                className="border rounded p-2 w-full"
-              />
-            </div>
-            <div className="mb-4">
-              <label htmlFor="password" className="block mb-1">Password:</label>
-              <input
-                type="password"
-                id="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-                className="border rounded p-2 w-full"
-              />
-            </div>
-            <div className="mb-4">
-              <label htmlFor="profileImage" className="block mb-1">Profile Image:</label>
-              <input
-                type="file"
-                id="profileImage"
-                accept="image/*"
-                onChange={handleImageChange}
-                className="border rounded p-2 w-full"
-              />
-            </div>
+        <form onSubmit={handleSubmit} className="bg-white p-8 rounded-lg shadow-lg animate-fadeInSlow max-w-md w-full">
+          <div className="mb-4">
+            <label className="block text-gray-700 font-semibold mb-2">Name:</label>
+            <input
+              type="text"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              className="border rounded w-full py-2 px-3 focus:outline-none focus:ring-2 focus:ring-purple-500 transition duration-200"
+              required
+            />
+          </div>
+          
+          <div className="mb-4">
+            <label className="block text-gray-700 font-semibold mb-2">Password:</label>
+            <input
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="border rounded w-full py-2 px-3 focus:outline-none focus:ring-2 focus:ring-purple-500 transition duration-200"
+              required
+            />
+          </div>
+          
+          <div className="mb-4">
+            <label className="block text-gray-700 font-semibold mb-2">Profile Image:</label>
+            <input type="file" onChange={handleImageChange} accept="image/*" className="mb-4" />
             {profileImage && (
-              <div className="mb-4">
-                <img src={profileImage} alt="Profile Preview" className="w-24 h-24 rounded-full" />
-              </div>
+              <img 
+                src={profileImage} 
+                alt="Profile Preview" 
+                className="h-20 w-20 rounded-full border-2 border-gray-300 object-cover transition-transform duration-300 ease-in-out hover:scale-110"
+              />
             )}
-            <button
-              type="submit"
-              className="bg-blue-500 text-white rounded px-4 py-2"
-            >
-              Signup
-            </button>
-          </form>
-        </>
+          </div>
+
+          {error && <div className="text-red-500 mb-4">{error}</div>}
+          
+          <button type="submit" className="bg-purple-500 hover:bg-purple-600 text-white font-bold py-2 px-4 rounded-full transition duration-200 transform hover:scale-105">
+            Sign Up
+          </button>
+        </form>
       )}
     </div>
   );

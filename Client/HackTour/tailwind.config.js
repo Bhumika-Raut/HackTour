@@ -12,4 +12,5 @@ plugins: [require("daisyui")],
       "./src/**/*.{js,ts,jsx,tsx}",
     ],
   },
+  
 }

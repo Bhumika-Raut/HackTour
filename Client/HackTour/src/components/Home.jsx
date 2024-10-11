@@ -21,7 +21,7 @@ function Home({ onSave }) {
       })
       .catch(error => {
         console.error('Error fetching data:', error);
-        setHackData([]); // Set to empty array in case of error to avoid undefined issues
+        setHackData([]); 
       });
   }, []);
   
@@ -71,9 +71,9 @@ function Home({ onSave }) {
 
   return (
     <div className='max-w-screen-2xl container mx-auto px-16 md:px-20 px-3'>
-      <h1 className='text-3xl font-bold text-center mb-6'>HOME</h1>
+      {/* <h1 className='text-3xl font-bold text-center mb-6'>HOME</h1> */}
       {hackData.length > 0 ? (
-        <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6'>
+        <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-9'>
           {hackData.map((item, index) => (
             <div key={item._id} className='bg-gray-800 p-6 rounded-lg shadow-lg relative'>
               <h2 className='text-xl font-semibold mb-2 text-white'>{item.title}</h2>
