@@ -82,7 +82,26 @@ router.post('/saved/:id', async (req, res) => {
     }
 });
 
+// Signup route
+router.post('/signup', async (req, res) => {
+    try {
+        const { name, password, profileImage } = req.body;
 
+        // Check if account already exists
+        const existingAccount = await Account.findOne({ name });
+        if (existingAccount) {
+            return res.status(400).json({ error: 'Account already exists' });
+        }
 
+        // Create new account
+        const newAccount = new Account({ name, password, profileImage });
+        await newAccount.save();
+
+        res.status(201).json({ message: 'Account created successfully' });
+    } catch (err) {
+        console.log('Error in POST signup request', err);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
 
 module.exports = router;

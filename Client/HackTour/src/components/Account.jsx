@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import axios from 'axios';
 
 function Account() {
   const [name, setName] = useState('');
@@ -6,24 +7,43 @@ function Account() {
   const [profileImage, setProfileImage] = useState(null);
   const [isSignedUp, setIsSignedUp] = useState(false);
   const [greeting, setGreeting] = useState('');
+  const [error, setError] = useState('');
 
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
-      setProfileImage(URL.createObjectURL(file));
+      setProfileImage(URL.createObjectURL(file)); // Preview image
     }
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    setGreeting(`Welcome, ${name}!`);
-    setIsSignedUp(true);
+
+    try {
+      const formData = new FormData();
+      formData.append('name', name);
+      formData.append('password', password);
+      formData.append('profileImage', profileImage || '');
+
+      // Send POST request to signup
+      const response = await axios.post('http://localhost:5000/signup', { 
+        name, 
+        password, 
+        profileImage: profileImage || '' // Profile image is optional
+      });
+
+      setGreeting(`Welcome, ${name}!`);
+      setIsSignedUp(true);
+      setError(''); // Clear any errors
+    } catch (err) {
+      setError(err.response?.data?.error || 'Signup failed');
+    }
   };
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-r from-yellow-300 via-purple-500 to-purple-600">
+    <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-r from-green-300 via-purple-500 to-purple-600">
       <h1 className="text-4xl font-bold text-white mb-4 animate-bounce">Account</h1>
-      
+
       {isSignedUp ? (
         <div className="text-xl text-white mt-4 animate-fadeIn">{greeting}</div>
       ) : (
@@ -61,9 +81,11 @@ function Account() {
               />
             )}
           </div>
+
+          {error && <div className="text-red-500 mb-4">{error}</div>}
           
           <button type="submit" className="bg-purple-500 hover:bg-purple-600 text-white font-bold py-2 px-4 rounded-full transition duration-200 transform hover:scale-105">
-            Sign Up / Log In
+            Sign Up
           </button>
         </form>
       )}

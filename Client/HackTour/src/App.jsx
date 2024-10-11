@@ -6,7 +6,7 @@ import Saved from './components/Saved';
 import Account from './components/Account'; 
 
 function App() {
-  const [theme, setTheme] = useState("light"); 
+  const [theme, setTheme] = useState("light");
 
   const toggleTheme = () => {
     setTheme((prevTheme) => (prevTheme === "light" ? "dark" : "light"));
@@ -15,7 +15,8 @@ function App() {
   return (
     <Router>
       <div className={`min-h-screen ${theme === "dark" ? "bg-black text-white" : "bg-white text-black"}`}>
-        <Navbar onToggleTheme={toggleTheme} /> 
+        <Navbar onToggleTheme={toggleTheme} theme={theme} /> {/* Pass theme prop to Navbar */}
+        
         <div className="homepage-content">
           <Routes>
             <Route path="/" element={<Home />} />
