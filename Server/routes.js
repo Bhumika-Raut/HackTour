@@ -4,10 +4,9 @@ const TechEntity = require('./schema');
 const RandomEntity = require('./randomSchema'); 
 const SavedEntity = require('./savedSchema'); 
 const Account = require('./accountSchema'); 
-const cors = require('cors');
 
 router.use(express.json());
-router.use(cors());
+router.use(require('cors')());
 
 // Get tech entities
 router.get('/tech', async (req, res) => {
@@ -27,7 +26,7 @@ router.get('/home', async (req, res) => {
         res.json(random);
     } catch (err) {
         console.error('Error in GET random request', err);
-        res.status(500).json({ error: 'Internal Server Error' }); 
+        res.status(500).json({ error: 'Internal Server Error' });
     }
 });
 
