@@ -20,6 +20,11 @@ const savedSchema = new mongoose.Schema({
   createdAt: {
     type: Date,
     default: Date.now
+  },
+  userId: {  
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Account',  
+    required: true
   }
 });
 

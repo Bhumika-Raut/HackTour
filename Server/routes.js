@@ -63,37 +63,58 @@ router.post('/like/:id', async (req, res) => {
 });
 
 // Save an entity
-router.post('/saved/:id', async (req, res) => {
+router.get('/saved', async (req, res) => {
+    const userId = req.query.userId;  
     try {
-        const { id } = req.params;
-        const entity = await RandomEntity.findById(id);  
-
-        if (!entity) {
-            return res.status(404).json({ error: 'Entity not found' });
-        }
-
-        const savedEntity = new SavedEntity(entity.toObject());  
-        await savedEntity.save();  
-
-        res.json({ message: 'Entity saved successfully' });
+      const saved = await SavedEntity.find({ userId }).exec(); 
+      res.json(saved);
     } catch (err) {
-        console.error('Error in POST saved request', err);
-        res.status(500).json({ error: 'Internal Server Error' });
+      console.error('Error in GET saved request', err);
+      res.status(500).json({ error: 'Internal Server Error' });
     }
-});
+  });
+  
+  
+  router.post('/saved/:id', async (req, res) => {
+    try {
+      const { id } = req.params;
+      const userId = req.body.userId;  
+      const entity = await RandomEntity.findById(id);
+  
+      if (!entity) {
+        return res.status(404).json({ error: 'Entity not found' });
+      }
+  
+      const savedEntity = new SavedEntity({
+        title: entity.title,
+        description: entity.description,
+        image: entity.image,
+        userId: userId  
+      });
+  
+      await savedEntity.save();
+      res.json({ message: 'Entity saved successfully' });
+    } catch (err) {
+      console.error('Error in POST saved request', err);
+      res.status(500).json({ error: 'Internal Server Error' });
+    }
+  });
+  
 
 // Signup route
 router.post('/signup', async (req, res) => {
+    // the existing one
     try {
         const { name, password, profileImage } = req.body;
 
-        // Check if account already exists
-        const existingAccount = await Account.findOne({ name });
+        
+        const existingAccount = await Account.findOne({ name, password });
+        // I have changed from name to name, password in line 91
         if (existingAccount) {
             return res.status(400).json({ error: 'Account already exists' });
         }
 
-        // Create new account
+        //  new account
         const newAccount = new Account({ name, password, profileImage });
         await newAccount.save();
 

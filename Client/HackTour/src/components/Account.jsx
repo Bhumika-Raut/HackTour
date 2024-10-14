@@ -106,7 +106,7 @@ function Account({ user, setUser }) {
           </div>
 
           {error && <div className="text-red-500 mb-4">{error}</div>}
-          
+         
           <button type="submit" className="bg-purple-500 hover:bg-purple-600 text-white font-bold py-2 px-4 rounded-full transition duration-200">
             Sign Up
           </button>
