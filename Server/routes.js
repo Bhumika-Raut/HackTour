@@ -32,13 +32,24 @@ router.get('/home', async (req, res) => {
 });
 
 // Get saved entities
-router.get('/saved', async (req, res) => {
+// router.get('/saved', async (req, res) => {
+//     try {
+//         const saved = await SavedEntity.find().limit(2000).exec();
+//         res.json(saved);
+//     } catch (err) {
+//         console.error('Error in GET saved request', err);
+//         res.status(500).json({ error: 'Internal Server Error' }); 
+//     }
+// });
+
+router.get('/saved/:userId', async (req, res) => {
     try {
-        const saved = await SavedEntity.find().limit(2000).exec();
+        const { userId } = req.params; // Get the user ID from the request
+        const saved = await SavedEntity.find({ userId }).limit(2000).exec(); // Filter by user ID
         res.json(saved);
     } catch (err) {
         console.error('Error in GET saved request', err);
-        res.status(500).json({ error: 'Internal Server Error' }); 
+        res.status(500).json({ error: 'Internal Server Error' });
     }
 });
 
@@ -63,43 +74,24 @@ router.post('/like/:id', async (req, res) => {
 });
 
 // Save an entity
-router.get('/saved', async (req, res) => {
-    const userId = req.query.userId;  
+router.post('/saved/:id', async (req, res) => {
     try {
-      const saved = await SavedEntity.find({ userId }).exec(); 
-      res.json(saved);
+        const { id } = req.params;
+        const entity = await RandomEntity.findById(id);  
+
+        if (!entity) {
+            return res.status(404).json({ error: 'Entity not found' });
+        }
+
+        const savedEntity = new SavedEntity(entity.toObject());  
+        await savedEntity.save();  
+
+        res.json({ message: 'Entity saved successfully' });
     } catch (err) {
-      console.error('Error in GET saved request', err);
-      res.status(500).json({ error: 'Internal Server Error' });
+        console.error('Error in POST saved request', err);
+        res.status(500).json({ error: 'Internal Server Error' });
     }
-  });
-  
-  
-  router.post('/saved/:id', async (req, res) => {
-    try {
-      const { id } = req.params;
-      const userId = req.body.userId;  
-      const entity = await RandomEntity.findById(id);
-  
-      if (!entity) {
-        return res.status(404).json({ error: 'Entity not found' });
-      }
-  
-      const savedEntity = new SavedEntity({
-        title: entity.title,
-        description: entity.description,
-        image: entity.image,
-        userId: userId  
-      });
-  
-      await savedEntity.save();
-      res.json({ message: 'Entity saved successfully' });
-    } catch (err) {
-      console.error('Error in POST saved request', err);
-      res.status(500).json({ error: 'Internal Server Error' });
-    }
-  });
-  
+});
 
 // Signup route
 router.post('/signup', async (req, res) => {
