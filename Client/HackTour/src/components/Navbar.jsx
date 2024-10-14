@@ -62,9 +62,9 @@ function Navbar({ onToggleTheme, theme, user, onSignOut }) {
         <div className="flex items-center ml-4">
           {user ? (
             <>
-              {/* Display signed-in user's profile picture */}
+             
               <img
-                src={user.profileImage} // Ensure this property exists
+                src={user.profileImage} 
                 alt="Profile"
                 className="h-10 w-10 rounded-full border-2 border-gray-300 object-cover"
               />

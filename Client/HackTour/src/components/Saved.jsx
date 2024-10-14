@@ -1,17 +1,19 @@
 import React, { useEffect, useState } from "react";
 
-function Saved() {
+function Saved({ user }) {  
   const [savedData, setSavedData] = useState([]);
 
   useEffect(() => {
-    fetch('https://hacktour.onrender.com/saved')
-      .then(response => response.json())
-      .then(data => {
-        console.log('Saved items:', data);
-        setSavedData(data);
-      })
-      .catch(error => console.error('Error fetching saved items:', error));
-  }, []);
+    if (user) {
+      fetch(`https://hacktour.onrender.com/saved?userId=${user._id}`)  // Include userId in the request
+        .then(response => response.json())
+        .then(data => {
+          console.log('Saved items:', data);
+          setSavedData(data);
+        })
+        .catch(error => console.error('Error fetching saved items:', error));
+    }
+  }, [user]);
 
   return (
     <div className='max-w-screen-2xl container mx-auto px-16 md:px-20 px-3'>
