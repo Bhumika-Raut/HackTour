@@ -31,21 +31,11 @@ router.get('/home', async (req, res) => {
     }
 });
 
-// Get saved entities
-// router.get('/saved', async (req, res) => {
-//     try {
-//         const saved = await SavedEntity.find().limit(2000).exec();
-//         res.json(saved);
-//     } catch (err) {
-//         console.error('Error in GET saved request', err);
-//         res.status(500).json({ error: 'Internal Server Error' }); 
-//     }
-// });
-
+// Get saved entities by user ID
 router.get('/saved/:userId', async (req, res) => {
     try {
-        const { userId } = req.params; // Get the user ID from the request
-        const saved = await SavedEntity.find({ userId }).limit(2000).exec(); // Filter by user ID
+        const { userId } = req.params; 
+        const saved = await SavedEntity.find({ userId }).limit(2000).exec(); 
         res.json(saved);
     } catch (err) {
         console.error('Error in GET saved request', err);
@@ -83,7 +73,7 @@ router.post('/saved/:id', async (req, res) => {
             return res.status(404).json({ error: 'Entity not found' });
         }
 
-        const savedEntity = new SavedEntity(entity.toObject());  
+        const savedEntity = new SavedEntity({ ...entity.toObject(), userId: req.body.userId });  // Assuming you're saving userId from request body
         await savedEntity.save();  
 
         res.json({ message: 'Entity saved successfully' });
@@ -95,18 +85,14 @@ router.post('/saved/:id', async (req, res) => {
 
 // Signup route
 router.post('/signup', async (req, res) => {
-    // the existing one
     try {
         const { name, password, profileImage } = req.body;
 
-        
-        const existingAccount = await Account.findOne({ name, password });
-        // I have changed from name to name, password in line 91
+        const existingAccount = await Account.findOne({ name });
         if (existingAccount) {
             return res.status(400).json({ error: 'Account already exists' });
         }
 
-        //  new account
         const newAccount = new Account({ name, password, profileImage });
         await newAccount.save();
 
