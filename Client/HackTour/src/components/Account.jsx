@@ -13,7 +13,6 @@ function Account({ user, setUser }) {
       setName(user.name);
       setProfileImage(user.profileImage);
     } else {
-      // Reset input fields when user is not logged in
       setName('');
       setPassword('');
       setProfileImage(null);
@@ -23,69 +22,69 @@ function Account({ user, setUser }) {
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
-      setProfileImage(file); // Store the file instead of the URL for upload
+      setProfileImage(file);
     }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
     if (!name || !password) {
       setError('Name and password are required.');
       return;
     }
 
     try {
-      const url = isLoginMode 
-        ? 'https://hacktour.onrender.com/login' 
+      const url = isLoginMode
+        ? 'https://hacktour.onrender.com/login'
         : 'https://hacktour.onrender.com/signup';
-      
+
       const formData = new FormData();
       formData.append('name', name);
       formData.append('password', password);
-      if (!isLoginMode) {
-        formData.append('profileImage', profileImage); // Add image to FormData
+      if (!isLoginMode && profileImage) {
+        formData.append('profileImage', profileImage);
       }
 
       const response = await axios.post(url, formData, {
         headers: {
-          'Content-Type': 'multipart/form-data' // Set content type for file upload
-        }
+          'Content-Type': 'multipart/form-data',
+        },
       });
 
       const signedInUser = {
         name: response.data.user.name,
-        profileImage: isLoginMode ? response.data.user.profileImage : URL.createObjectURL(profileImage), // Create URL for preview
+        profileImage: response.data.user.profileImage,
       };
       setUser(signedInUser);
-      localStorage.setItem("user", JSON.stringify(signedInUser)); 
-      setError(''); 
-      if (!isLoginMode) setIsLoginMode(true); // Switch to login mode after successful signup
-    } catch (error) {
-      console.error('Error:', error.response.data.error);
-      setError(error.response.data.error); 
+      localStorage.setItem('user', JSON.stringify(signedInUser));
+      setError('');
+      if (!isLoginMode) setIsLoginMode(true);
+    } catch (err) {
+      setError(err.response?.data?.error || 'An error occurred.');
     }
   };
 
   const handleSignOut = () => {
     setUser(null);
-    localStorage.removeItem("user"); 
+    localStorage.removeItem('user');
   };
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-r from-green-300 via-purple-500 to-purple-600">
-      <h1 className="text-4xl font-bold text-white mb-4 animate-bounce">{isLoginMode ? 'Login' : 'Sign Up'}</h1>
+      <h1 className="text-4xl font-bold text-white mb-4 animate-bounce">
+        {isLoginMode ? 'Login' : 'Sign Up'}
+      </h1>
 
       {user ? (
         <div className="text-xl text-white mt-4">
           <p>Welcome, {user.name}!</p>
-          <img 
-            src={user.profileImage} 
-            alt="Profile" 
+          <img
+            src={user.profileImage}
+            alt="Profile"
             className="h-20 w-20 rounded-full border-2 border-gray-300 object-cover mt-4"
           />
-          <button 
-            onClick={handleSignOut} 
+          <button
+            onClick={handleSignOut}
             className="mt-4 bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded-full transition duration-200"
           >
             Sign Out
@@ -103,7 +102,7 @@ function Account({ user, setUser }) {
               required
             />
           </div>
-          
+
           <div className="mb-4">
             <label className="block text-gray-700 font-semibold mb-2">Password:</label>
             <input
@@ -118,34 +117,32 @@ function Account({ user, setUser }) {
           {!isLoginMode && (
             <div className="mb-4">
               <label className="block text-gray-700 font-semibold mb-2">Profile Image:</label>
-              <input
-                type="file"
-                onChange={handleImageChange}
-                className="border rounded w-full py-2 px-3 focus:outline-none focus:ring-2 focus:ring-purple-500 transition duration-200"
-              />
+              <input type="file" onChange={handleImageChange} accept="image/*" />
+              {profileImage && (
+                <img
+                  src={URL.createObjectURL(profileImage)}
+                  alt="Profile Preview"
+                  className="h-20 w-20 rounded-full border-2 border-gray-300 object-cover mt-4"
+                />
+              )}
             </div>
           )}
 
-          <div className="mb-4">
-            <button 
-              type="submit" 
-              className="bg-purple-500 hover:bg-purple-600 text-white font-bold py-2 px-4 rounded-full transition duration-200 w-full"
-            >
-              {isLoginMode ? 'Login' : 'Sign Up'}
-            </button>
-          </div>
+          {error && <div className="text-red-500 mb-4">{error}</div>}
 
-          <div className="text-center">
-            <button 
-              type="button" 
-              onClick={() => setIsLoginMode(!isLoginMode)} 
-              className="text-purple-500 hover:underline"
-            >
-              {isLoginMode ? 'Create an account' : 'Already have an account?'}
-            </button>
-          </div>
-
-          {error && <p className="text-red-500 text-sm mt-2">{error}</p>}
+          <button
+            type="submit"
+            className="bg-purple-500 hover:bg-purple-600 text-white font-bold py-2 px-4 rounded-full transition duration-200"
+          >
+            {isLoginMode ? 'Login' : 'Sign Up'}
+          </button>
+          <button
+            type="button"
+            onClick={() => setIsLoginMode(!isLoginMode)}
+            className="mt-2 text-purple-500 hover:underline"
+          >
+            {isLoginMode ? 'Switch to Sign Up' : 'Switch to Login'}
+          </button>
         </form>
       )}
     </div>
