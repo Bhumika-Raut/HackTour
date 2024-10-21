@@ -4,17 +4,17 @@ const TechEntity = require('./schema');
 const RandomEntity = require('./randomSchema');
 const SavedEntity = require('./savedSchema');
 const Account = require('./accountSchema');
+
 const multer = require('multer');
-const cors = require('cors');
 
 // Middleware for parsing JSON and enabling CORS
-router.use(cors());
 router.use(express.json());
+router.use(require('cors')());
 
 // Configure multer for file uploads
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
-        cb(null, 'uploads/'); // Specify the upload directory
+        cb(null, 'uploads/'); // Specify upload directory
     },
     filename: function (req, file, cb) {
         cb(null, Date.now() + '-' + file.originalname); // Add timestamp to avoid filename clashes
@@ -29,7 +29,7 @@ router.get('/tech', async (req, res) => {
         const tech = await TechEntity.find().limit(2000).exec();
         res.json(tech);
     } catch (err) {
-        console.error('Error in GET tech request:', err);
+        console.error('Error in GET tech request', err);
         res.status(500).json({ error: 'Internal Server Error' });
     }
 });
@@ -40,7 +40,7 @@ router.get('/home', async (req, res) => {
         const random = await RandomEntity.find().limit(2000).exec();
         res.json(random);
     } catch (err) {
-        console.error('Error in GET home request:', err);
+        console.error('Error in GET random request', err);
         res.status(500).json({ error: 'Internal Server Error' });
     }
 });
@@ -52,7 +52,7 @@ router.get('/saved/:userId', async (req, res) => {
         const saved = await SavedEntity.find({ userId }).limit(2000).exec();
         res.json(saved);
     } catch (err) {
-        console.error('Error in GET saved request:', err);
+        console.error('Error in GET saved request', err);
         res.status(500).json({ error: 'Internal Server Error' });
     }
 });
@@ -72,7 +72,7 @@ router.post('/like/:id', async (req, res) => {
 
         res.json({ message: 'Like updated successfully', likes: entity.likes });
     } catch (err) {
-        console.error('Error in POST like request:', err);
+        console.error('Error in POST like request', err);
         res.status(500).json({ error: 'Internal Server Error' });
     }
 });
@@ -92,16 +92,15 @@ router.post('/saved/:id', async (req, res) => {
 
         res.json({ message: 'Entity saved successfully' });
     } catch (err) {
-        console.error('Error in POST saved request:', err);
+        console.error('Error in POST saved request', err);
         res.status(500).json({ error: 'Internal Server Error' });
     }
 });
 
 // Signup route
-router.post('/signup', upload.single('profileImage'), async (req, res) => {
+router.post('/signup', async (req, res) => {
     try {
-        const { name, password } = req.body;
-        const profileImage = req.file.path; // Get the path of the uploaded image
+        const { name, password, profileImage } = req.body;
 
         // Check if account already exists
         const existingAccount = await Account.findOne({ name });
@@ -115,7 +114,7 @@ router.post('/signup', upload.single('profileImage'), async (req, res) => {
 
         res.status(201).json({ message: 'Account created successfully' });
     } catch (err) {
-        console.error('Error in POST signup request:', err);
+        console.error('Error in POST signup request', err);
         res.status(500).json({ error: 'Internal Server Error' });
     }
 });
@@ -131,12 +130,9 @@ router.post('/login', async (req, res) => {
             return res.status(400).json({ error: 'Invalid username or password' });
         }
 
-        res.json({ 
-            message: 'Login successful', 
-            user: { name: account.name, profileImage: account.profileImage } 
-        });
+        res.json({ message: 'Login successful', user: { name: account.name, profileImage: account.profileImage } });
     } catch (err) {
-        console.error('Error in POST login request:', err);
+        console.error('Error in POST login request', err);
         res.status(500).json({ error: 'Internal Server Error' });
     }
 });
