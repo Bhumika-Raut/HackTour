@@ -5,6 +5,7 @@ const RandomEntity = require('./randomSchema');
 const SavedEntity = require('./savedSchema'); 
 const Account = require('./accountSchema'); 
 
+// Middleware for parsing JSON and enabling CORS
 router.use(express.json());
 router.use(require('cors')());
 
@@ -72,7 +73,7 @@ router.post('/saved/:id', async (req, res) => {
             return res.status(404).json({ error: 'Entity not found' });
         }
 
-        const savedEntity = new SavedEntity({ ...entity.toObject(), userId: req.body.userId });  // Assuming you're saving userId from request body
+        const savedEntity = new SavedEntity({ ...entity.toObject(), userId: req.body.userId });  
         await savedEntity.save();  
 
         res.json({ message: 'Entity saved successfully' });
@@ -82,7 +83,7 @@ router.post('/saved/:id', async (req, res) => {
     }
 });
 
-// Signup route
+// Signup route (without hashing)
 router.post('/signup', async (req, res) => {
     try {
         const { name, password, profileImage } = req.body;
@@ -93,7 +94,7 @@ router.post('/signup', async (req, res) => {
             return res.status(400).json({ error: 'Account already exists' });
         }
 
-        // Create and save new account
+        // Create and save new account (password stored as plain text)
         const newAccount = new Account({ name, password, profileImage });
         await newAccount.save();
 
@@ -104,14 +105,14 @@ router.post('/signup', async (req, res) => {
     }
 });
 
-// Login route
+// Login route (without hashing)
 router.post('/login', async (req, res) => {
     try {
         const { name, password } = req.body;
 
         // Check for account with provided credentials
-        const account = await Account.findOne({ name });
-        if (!account || account.password !== password) {
+        const account = await Account.findOne({ name, password });
+        if (!account) {
             return res.status(400).json({ error: 'Invalid username or password' });
         }
 
