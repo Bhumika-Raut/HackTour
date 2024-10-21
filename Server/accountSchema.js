@@ -11,7 +11,7 @@ const accountSchema = new mongoose.Schema({
     },
     profileImage: {
         type: String,
-    }
+    },
 });
 
 const Account = mongoose.model('Account', accountSchema);
