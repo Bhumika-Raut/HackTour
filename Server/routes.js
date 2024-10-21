@@ -1,11 +1,10 @@
 const express = require('express');
 const router = express.Router();
-const TechEntity = require('./schema');
-const RandomEntity = require('./randomSchema');
-const SavedEntity = require('./savedSchema');
-const Account = require('./accountSchema');
-
-const multer = require('multer');
+const TechEntity = require('./schema');            // Import other schema (assuming existing ones)
+const RandomEntity = require('./randomSchema');    // Random entity schema
+const SavedEntity = require('./savedSchema');      // Saved entity schema
+const Account = require('./accountSchema');        // Import account schema
+const multer = require('multer');                  // Import multer for file uploads
 
 // Middleware for parsing JSON and enabling CORS
 router.use(express.json());
@@ -14,16 +13,15 @@ router.use(require('cors')());
 // Configure multer for file uploads
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
-        cb(null, 'uploads/'); // Specify upload directory
+        cb(null, 'uploads/'); // Upload directory
     },
     filename: function (req, file, cb) {
-        cb(null, Date.now() + '-' + file.originalname); // Add timestamp to avoid filename clashes
+        cb(null, Date.now() + '-' + file.originalname); // Add timestamp to avoid name clashes
     },
 });
-
 const upload = multer({ storage: storage });
 
-// Get tech entities
+// Route to fetch tech entities
 router.get('/tech', async (req, res) => {
     try {
         const tech = await TechEntity.find().limit(2000).exec();
@@ -34,7 +32,7 @@ router.get('/tech', async (req, res) => {
     }
 });
 
-// Get home random entities
+// Route to fetch random home entities
 router.get('/home', async (req, res) => {
     try {
         const random = await RandomEntity.find().limit(2000).exec();
@@ -45,7 +43,7 @@ router.get('/home', async (req, res) => {
     }
 });
 
-// Get saved entities by user ID
+// Route to fetch saved entities by user ID
 router.get('/saved/:userId', async (req, res) => {
     try {
         const { userId } = req.params;
@@ -57,7 +55,7 @@ router.get('/saved/:userId', async (req, res) => {
     }
 });
 
-// Like an entity
+// Route to like an entity
 router.post('/like/:id', async (req, res) => {
     try {
         const { id } = req.params;
@@ -67,7 +65,7 @@ router.post('/like/:id', async (req, res) => {
             return res.status(404).json({ error: 'Entity not found' });
         }
 
-        entity.likes = (entity.likes || 0) + 1;
+        entity.likes = (entity.likes || 0) + 1;  // Increment likes
         await entity.save();
 
         res.json({ message: 'Like updated successfully', likes: entity.likes });
@@ -77,7 +75,7 @@ router.post('/like/:id', async (req, res) => {
     }
 });
 
-// Save an entity
+// Route to save an entity
 router.post('/saved/:id', async (req, res) => {
     try {
         const { id } = req.params;
@@ -97,18 +95,18 @@ router.post('/saved/:id', async (req, res) => {
     }
 });
 
-// Signup route
+// Route for user signup
 router.post('/signup', async (req, res) => {
     try {
         const { name, password, profileImage } = req.body;
 
-        // Check if account already exists
+        // Check if the account already exists
         const existingAccount = await Account.findOne({ name });
         if (existingAccount) {
             return res.status(400).json({ error: 'Account already exists' });
         }
 
-        // Create and save new account
+        // Create and save the new account
         const newAccount = new Account({ name, password, profileImage });
         await newAccount.save();
 
@@ -119,12 +117,12 @@ router.post('/signup', async (req, res) => {
     }
 });
 
-// Login route
+// Route for user login
 router.post('/login', async (req, res) => {
     try {
         const { name, password } = req.body;
 
-        // Check for account with provided credentials
+        // Check credentials
         const account = await Account.findOne({ name, password });
         if (!account) {
             return res.status(400).json({ error: 'Invalid username or password' });
