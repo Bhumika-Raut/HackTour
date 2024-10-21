@@ -87,17 +87,37 @@ router.post('/signup', async (req, res) => {
     try {
         const { name, password, profileImage } = req.body;
 
+        // Check if account already exists
         const existingAccount = await Account.findOne({ name });
         if (existingAccount) {
             return res.status(400).json({ error: 'Account already exists' });
         }
 
+        // Create and save new account
         const newAccount = new Account({ name, password, profileImage });
         await newAccount.save();
 
         res.status(201).json({ message: 'Account created successfully' });
     } catch (err) {
         console.error('Error in POST signup request', err);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
+
+// Login route
+router.post('/login', async (req, res) => {
+    try {
+        const { name, password } = req.body;
+
+        // Check for account with provided credentials
+        const account = await Account.findOne({ name, password });
+        if (!account) {
+            return res.status(400).json({ error: 'Invalid username or password' });
+        }
+
+        res.json({ message: 'Login successful', user: { name: account.name, profileImage: account.profileImage } });
+    } catch (err) {
+        console.error('Error in POST login request', err);
         res.status(500).json({ error: 'Internal Server Error' });
     }
 });

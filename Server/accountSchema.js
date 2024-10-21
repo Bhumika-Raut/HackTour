@@ -10,7 +10,7 @@ const accountSchema = new mongoose.Schema({
         required: true,
     },
     profileImage: {
-        type: String, 
+        type: String,
     }
 });
 
