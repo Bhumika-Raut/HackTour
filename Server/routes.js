@@ -72,7 +72,7 @@ router.post('/saved/:id', async (req, res) => {
             return res.status(404).json({ error: 'Entity not found' });
         }
 
-        const savedEntity = new SavedEntity({ ...entity.toObject(), userId: req.body.userId });  // Assuming you're saving userId from request body
+        const savedEntity = new SavedEntity({ ...entity.toObject(), userId: req.body.userId });  
         await savedEntity.save();  
 
         res.json({ message: 'Entity saved successfully' });
@@ -93,11 +93,15 @@ router.post('/signup', async (req, res) => {
             return res.status(400).json({ error: 'Account already exists' });
         }
 
-        // Create and save new account
-        const newAccount = new Account({ name, password, profileImage });
-        await newAccount.save();
+        // Create a new account
+        const newAccount = new Account({
+            name,
+            password, 
+            profileImage,
+        });
 
-        res.status(201).json({ message: 'Account created successfully' });
+        await newAccount.save();
+        res.status(201).json({ message: 'Account created successfully', user: { name, profileImage } });
     } catch (err) {
         console.error('Error in POST signup request', err);
         res.status(500).json({ error: 'Internal Server Error' });
@@ -108,11 +112,10 @@ router.post('/signup', async (req, res) => {
 router.post('/login', async (req, res) => {
     try {
         const { name, password } = req.body;
-
-        // Check for account with provided credentials
         const account = await Account.findOne({ name, password });
+
         if (!account) {
-            return res.status(400).json({ error: 'Invalid username or password' });
+            return res.status(400).json({ error: 'Invalid credentials' });
         }
 
         res.json({ message: 'Login successful', user: { name: account.name, profileImage: account.profileImage } });
