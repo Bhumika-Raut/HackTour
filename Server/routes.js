@@ -1,29 +1,43 @@
 const express = require('express');
 const router = express.Router();
-const TechEntity = require('./schema'); 
-const RandomEntity = require('./randomSchema'); 
-const SavedEntity = require('./savedSchema'); 
-const Account = require('./accountSchema'); 
+const TechEntity = require('./schema');
+const RandomEntity = require('./randomSchema');
+const SavedEntity = require('./savedSchema');
+const Account = require('./accountSchema');
+const multer = require('multer');
+const cors = require('cors');
 
 // Middleware for parsing JSON and enabling CORS
+router.use(cors());
 router.use(express.json());
-router.use(require('cors')());
+
+// Configure multer for file uploads
+const storage = multer.diskStorage({
+    destination: function (req, file, cb) {
+        cb(null, 'uploads/'); // Specify upload directory
+    },
+    filename: function (req, file, cb) {
+        cb(null, Date.now() + '-' + file.originalname); // Add timestamp to avoid filename clashes
+    },
+});
+
+const upload = multer({ storage: storage });
 
 // Get tech entities
 router.get('/tech', async (req, res) => {
     try {
-        const tech = await TechEntity.find().limit(2000).exec(); 
+        const tech = await TechEntity.find().limit(2000).exec();
         res.json(tech);
     } catch (err) {
         console.error('Error in GET tech request', err);
-        res.status(500).json({ error: 'Internal Server Error' }); 
+        res.status(500).json({ error: 'Internal Server Error' });
     }
 });
 
 // Get home random entities
 router.get('/home', async (req, res) => {
     try {
-        const random = await RandomEntity.find().limit(2000).exec(); 
+        const random = await RandomEntity.find().limit(2000).exec();
         res.json(random);
     } catch (err) {
         console.error('Error in GET random request', err);
@@ -34,8 +48,8 @@ router.get('/home', async (req, res) => {
 // Get saved entities by user ID
 router.get('/saved/:userId', async (req, res) => {
     try {
-        const { userId } = req.params; 
-        const saved = await SavedEntity.find({ userId }).limit(2000).exec(); 
+        const { userId } = req.params;
+        const saved = await SavedEntity.find({ userId }).limit(2000).exec();
         res.json(saved);
     } catch (err) {
         console.error('Error in GET saved request', err);
@@ -46,15 +60,15 @@ router.get('/saved/:userId', async (req, res) => {
 // Like an entity
 router.post('/like/:id', async (req, res) => {
     try {
-        const { id } = req.params; 
-        const entity = await RandomEntity.findById(id); 
+        const { id } = req.params;
+        const entity = await RandomEntity.findById(id);
 
         if (!entity) {
             return res.status(404).json({ error: 'Entity not found' });
         }
 
         entity.likes = (entity.likes || 0) + 1;
-        await entity.save(); 
+        await entity.save();
 
         res.json({ message: 'Like updated successfully', likes: entity.likes });
     } catch (err) {
@@ -67,14 +81,14 @@ router.post('/like/:id', async (req, res) => {
 router.post('/saved/:id', async (req, res) => {
     try {
         const { id } = req.params;
-        const entity = await RandomEntity.findById(id);  
+        const entity = await RandomEntity.findById(id);
 
         if (!entity) {
             return res.status(404).json({ error: 'Entity not found' });
         }
 
-        const savedEntity = new SavedEntity({ ...entity.toObject(), userId: req.body.userId });  
-        await savedEntity.save();  
+        const savedEntity = new SavedEntity({ ...entity.toObject(), userId: req.body.userId });
+        await savedEntity.save();
 
         res.json({ message: 'Entity saved successfully' });
     } catch (err) {
@@ -83,10 +97,11 @@ router.post('/saved/:id', async (req, res) => {
     }
 });
 
-// Signup route (without hashing)
-router.post('/signup', async (req, res) => {
+// Signup route
+router.post('/signup', upload.single('profileImage'), async (req, res) => {
     try {
-        const { name, password, profileImage } = req.body;
+        const { name, password } = req.body;
+        const profileImage = req.file.path; // Get the path of the uploaded file
 
         // Check if account already exists
         const existingAccount = await Account.findOne({ name });
@@ -94,7 +109,7 @@ router.post('/signup', async (req, res) => {
             return res.status(400).json({ error: 'Account already exists' });
         }
 
-        // Create and save new account (password stored as plain text)
+        // Create and save new account
         const newAccount = new Account({ name, password, profileImage });
         await newAccount.save();
 
@@ -105,7 +120,7 @@ router.post('/signup', async (req, res) => {
     }
 });
 
-// Login route (without hashing)
+// Login route
 router.post('/login', async (req, res) => {
     try {
         const { name, password } = req.body;
