@@ -6,14 +6,20 @@ function Account({ user, setUser }) {
     const [password, setPassword] = useState('');
     const [profileImage, setProfileImage] = useState(null);
     const [error, setError] = useState('');
-    const [isLogin, setIsLogin] = useState(true); // Toggle between signup and login
+    const [isLogin, setIsLogin] = useState(true); 
 
     useEffect(() => {
+        // Load user data from localStorage on mount
+        const savedUser = localStorage.getItem("user");
+        if (savedUser) {
+            setUser(JSON.parse(savedUser));
+        }
+        
         if (user) {
             setName(user.name);
             setProfileImage(user.profileImage);
         }
-    }, [user]);
+    }, [user, setUser]);
 
     const handleImageChange = (e) => {
         const file = e.target.files[0];
@@ -54,7 +60,7 @@ function Account({ user, setUser }) {
                 name,
                 password,
             });
-            const loggedInUser = response.data.user;
+            const loggedInUser = response.data.user; // This should contain profileImage
             setUser(loggedInUser);
             localStorage.setItem("user", JSON.stringify(loggedInUser));
             setError('');
