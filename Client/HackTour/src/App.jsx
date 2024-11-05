@@ -22,10 +22,15 @@ function App() {
         setUser(null);
     };
 
+    // Function to toggle theme
+    const handleToggleTheme = () => {
+        setTheme(prevTheme => (prevTheme === 'light' ? 'dark' : 'light'));
+    };
+
     return (
         <Router>
             <div className={`min-h-screen ${theme === 'light' ? 'bg-white' : 'bg-gray-900'} transition duration-500`}>
-                <Navbar user={user} handleSignOut={handleSignOut} />
+                <Navbar user={user} onToggleTheme={handleToggleTheme} theme={theme} onSignOut={handleSignOut} />
                 <Routes>
                     <Route path="/" element={<Home />} />
                     <Route path="/saved" element={<Saved />} />
