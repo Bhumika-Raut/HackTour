@@ -1,3 +1,4 @@
+// savedEntitySchema.js
 const mongoose = require('mongoose');
 
 const savedEntitySchema = new mongoose.Schema({

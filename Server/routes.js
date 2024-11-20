@@ -1,27 +1,24 @@
 const express = require('express');
 const router = express.Router();
-const TechEntity = require('./schema');            // Import other schema (assuming existing ones)
-const RandomEntity = require('./randomSchema');    // Random entity schema
-const SavedEntity = require('./savedSchema');      // Saved entity schema
-const Account = require('./accountSchema');        // Import account schema
-const multer = require('multer');                  // Import multer for file uploads
+const TechEntity = require('./schema');            
+const RandomEntity = require('./randomSchema');    
+const SavedEntity = require('./savedSchema');      
+const Account = require('./accountSchema');        
+const multer = require('multer');                  
 
-// Middleware for parsing JSON and enabling CORS
 router.use(express.json());
 router.use(require('cors')());
 
-// Configure multer for file uploads
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
-        cb(null, 'uploads/'); // Upload directory
+        cb(null, 'uploads/'); 
     },
     filename: function (req, file, cb) {
-        cb(null, Date.now() + '-' + file.originalname); // Add timestamp to avoid name clashes
+        cb(null, Date.now() + '-' + file.originalname); 
     },
 });
 const upload = multer({ storage: storage });
 
-// Route to fetch tech entities
 router.get('/tech', async (req, res) => {
     try {
         const tech = await TechEntity.find().limit(2000).exec();
@@ -32,7 +29,6 @@ router.get('/tech', async (req, res) => {
     }
 });
 
-// Route to fetch random home entities
 router.get('/home', async (req, res) => {
     try {
         const random = await RandomEntity.find().limit(2000).exec();
@@ -43,7 +39,6 @@ router.get('/home', async (req, res) => {
     }
 });
 
-// Route to fetch saved entities by user ID
 router.get('/saved/:userId', async (req, res) => {
     try {
         const { userId } = req.params;
@@ -55,7 +50,6 @@ router.get('/saved/:userId', async (req, res) => {
     }
 });
 
-// Route to like an entity
 router.post('/like/:id', async (req, res) => {
     try {
         const { id } = req.params;
@@ -65,7 +59,7 @@ router.post('/like/:id', async (req, res) => {
             return res.status(404).json({ error: 'Entity not found' });
         }
 
-        entity.likes = (entity.likes || 0) + 1;  // Increment likes
+        entity.likes = (entity.likes || 0) + 1;  
         await entity.save();
 
         res.json({ message: 'Like updated successfully', likes: entity.likes });
@@ -75,7 +69,6 @@ router.post('/like/:id', async (req, res) => {
     }
 });
 
-// Route to save an entity
 router.post('/saved/:id', async (req, res) => {
     try {
         const { id } = req.params;
@@ -85,8 +78,25 @@ router.post('/saved/:id', async (req, res) => {
             return res.status(404).json({ error: 'Entity not found' });
         }
 
-        const savedEntity = new SavedEntity({ ...entity.toObject(), userId: req.body.userId });
+        // Check if the user already saved this entity
+        const existingSavedEntity = await SavedEntity.findOne({ userId: req.body.userId, entityId: id });
+        if (existingSavedEntity) {
+            return res.status(400).json({ error: 'Entity already saved by this user' });
+        }
+
+        const savedEntity = new SavedEntity({
+            ...entity.toObject(),
+            userId: req.body.userId,
+        });
+
         await savedEntity.save();
+
+        // Optionally, update the user's savedItems field in Account if you want to store it there
+        const user = await Account.findById(req.body.userId);
+        if (user) {
+            user.savedItems.push(savedEntity);
+            await user.save();
+        }
 
         res.json({ message: 'Entity saved successfully' });
     } catch (err) {
@@ -95,19 +105,16 @@ router.post('/saved/:id', async (req, res) => {
     }
 });
 
-// Route to handle sign up
 router.post('/signup', upload.single('profileImage'), async (req, res) => {
     try {
         const { name, password } = req.body;
         const profileImage = req.file ? req.file.path : null;
 
-        // Check if the account already exists
         const existingAccount = await Account.findOne({ name });
         if (existingAccount) {
             return res.status(400).json({ error: 'Account already exists' });
         }
 
-        // Create and save the new account
         const newAccount = new Account({ name, password, profileImage });
         await newAccount.save();
 
@@ -118,23 +125,19 @@ router.post('/signup', upload.single('profileImage'), async (req, res) => {
     }
 });
 
-// Route to handle login
 router.post('/login', async (req, res) => {
     try {
         const { name, password } = req.body;
 
-        // Find the user by name
         const user = await Account.findOne({ name });
         if (!user) {
             return res.status(400).json({ error: 'User not found' });
         }
 
-        // Check if the password matches (without encryption for this example)
         if (user.password !== password) {
             return res.status(400).json({ error: 'Invalid credentials' });
         }
 
-        // Respond with the user data
         res.json({
             user: {
                 name: user.name,

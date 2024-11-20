@@ -1,3 +1,4 @@
+// Account.js
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 
@@ -38,24 +39,20 @@ function Account({ user, setUser }) {
                 formData.append('password', password);
                 formData.append('profileImage', profileImage);
 
-                // Send the signup request
                 response = await axios.post('https://hacktour.onrender.com/signup', formData, {
                     headers: { 'Content-Type': 'multipart/form-data' },
                 });
 
-                // If signup is successful, create a new user object
                 const signedInUser = { name, profileImage };
                 setUser(signedInUser);
                 localStorage.setItem('user', JSON.stringify(signedInUser));
                 setError('');
             } else {
-                // Send the login request
                 response = await axios.post('https://hacktour.onrender.com/login', {
                     name,
                     password,
                 });
 
-                // If login is successful, set the user details
                 const loggedInUser = { name: response.data.user.name, profileImage: response.data.user.profileImage };
                 setUser(loggedInUser);
                 localStorage.setItem('user', JSON.stringify(loggedInUser));

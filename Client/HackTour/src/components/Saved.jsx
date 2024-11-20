@@ -1,3 +1,4 @@
+// Saved.js
 import React, { useState, useEffect } from 'react';
 
 function Saved() {
@@ -23,7 +24,7 @@ function Saved() {
       })
       .catch(error => {
         console.error('Error fetching saved entities:', error);
-        setSavedData([]);
+        setSavedData([]); // Handle error scenario
       });
   }, [userId]);
 
