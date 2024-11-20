@@ -15,13 +15,6 @@ function Account({ user, setUser }) {
         }
     }, [user]);
 
-    const handleImageChange = (e) => {
-        const file = e.target.files[0];
-        if (file) {
-            setProfileImage(URL.createObjectURL(file)); // Preview uploaded image
-        }
-    };
-
     const handleSubmit = async (e) => {
         e.preventDefault();
 
@@ -39,10 +32,9 @@ function Account({ user, setUser }) {
                     password,
                     profileImage,
                 });
-
                 const signedInUser = { name, profileImage };
                 setUser(signedInUser);
-                localStorage.setItem("user", JSON.stringify(signedInUser));
+                localStorage.setItem('user', JSON.stringify(signedInUser));
                 setError('');
             } else {
                 // Login request
@@ -51,20 +43,23 @@ function Account({ user, setUser }) {
                     password,
                 });
 
-                const loggedInUser = { name: response.data.user.name, profileImage: response.data.user.profileImage };
+                const loggedInUser = {
+                    name: response.data.user.name,
+                    profileImage: response.data.user.profileImage,
+                };
                 setUser(loggedInUser);
-                localStorage.setItem("user", JSON.stringify(loggedInUser));
+                localStorage.setItem('user', JSON.stringify(loggedInUser));
                 setError('');
             }
         } catch (error) {
-            console.error(isSignup ? 'Sign up error:' : 'Login error:', error.response.data.error);
-            setError(error.response.data.error);
+            console.error(isSignup ? 'Sign up error:' : 'Login error:', error.response?.data?.error || error.message);
+            setError(error.response?.data?.error || 'An error occurred');
         }
     };
 
     const handleSignOut = () => {
         setUser(null);
-        localStorage.removeItem("user");
+        localStorage.removeItem('user');
     };
 
     return (
@@ -74,7 +69,9 @@ function Account({ user, setUser }) {
             {user ? (
                 <div className="text-center">
                     <h2 className="text-2xl font-bold text-white">Welcome, {user.name}!</h2>
-                    {user.profileImage && <img src={user.profileImage} alt="Profile" className="mt-4 rounded-full w-32 h-32" />}
+                    {user.profileImage && (
+                        <img src={user.profileImage} alt="Profile" className="mt-4 rounded-full w-32 h-32" />
+                    )}
                     <button
                         className="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded mt-4"
                         onClick={handleSignOut}
@@ -110,7 +107,7 @@ function Account({ user, setUser }) {
                             <input
                                 type="file"
                                 className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight"
-                                onChange={handleImageChange}
+                                onChange={(e) => setProfileImage(e.target.files[0])}
                             />
                         </div>
                     )}
