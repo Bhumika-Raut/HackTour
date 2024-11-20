@@ -1,17 +1,17 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { WordTokenizer } from 'natural';
 
 function NLPExample() {
-    // State to hold user input and tokens
+   
     const [inputText, setInputText] = useState('');
     const [tokens, setTokens] = useState([]);
 
-    // Handle input change
+    
     const handleInputChange = (event) => {
         setInputText(event.target.value);
     };
 
-    // Tokenize the input text
+    
     const tokenizeText = () => {
         const tokenizer = new WordTokenizer();
         const tokenizedWords = tokenizer.tokenize(inputText);
