@@ -79,11 +79,11 @@ function Home() {
           {navItems.map((item, index) => (
             <div
               key={item.id}
-              className={`transition-transform duration-300 ease-in-out ${index === activeIndex ? 'translate-x-0' : 'translate-x-full'}`}
+              className={`transition-transform duration-300 ${
+                activeIndex === index ? 'transform translate-x-0' : 'transform translate-x-full'
+              }`}
             >
-              <a href={item.link} className="text-white mx-2 p-2 hover:bg-gray-700 rounded">
-                {item.title}
-              </a>
+              <a href={item.link} className="text-white text-lg">{item.title}</a>
             </div>
           ))}
         </div>
@@ -91,26 +91,22 @@ function Home() {
           &#10095;
         </button>
       </div>
-
-      {hackData.length > 0 ? (
-        <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-9'>
-          {hackData.map((item) => (
-            <div key={item._id} className='bg-gray-800 p-4 rounded-lg'>
-              <img src={item.image} alt={item.title} className='w-full h-48 object-cover mb-4 rounded' />
-              <h2 className='text-xl text-white'>{item.title}</h2>
-              <p className='text-gray-400'>{item.description}</p>
-              <button
-                onClick={() => handleSave(item)}
-                className='mt-4 text-white bg-blue-500 px-4 py-2 rounded'
-              >
-                Save this Entity
-              </button>
-            </div>
-          ))}
-        </div>
-      ) : (
-        <p className='text-white mt-5'>No hacks available at the moment</p>
-      )}
+      
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 mt-6">
+        {hackData.map((item) => (
+          <div key={item._id} className="bg-gray-800 p-4 rounded-lg">
+            <img src={item.image} alt={item.name} className="w-full h-48 object-cover mb-4 rounded" />
+            <h2 className="text-xl text-white">{item.name}</h2>
+            <p className="text-gray-400">{item.description}</p>
+            <button
+              className="bg-blue-500 text-white mt-4 py-2 px-4 rounded"
+              onClick={() => handleSave(item)}
+            >
+              Save Item
+            </button>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }

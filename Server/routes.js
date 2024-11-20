@@ -118,4 +118,33 @@ router.post('/signup', upload.single('profileImage'), async (req, res) => {
     }
 });
 
+// Route to handle login
+router.post('/login', async (req, res) => {
+    try {
+        const { name, password } = req.body;
+
+        // Find the user by name
+        const user = await Account.findOne({ name });
+        if (!user) {
+            return res.status(400).json({ error: 'User not found' });
+        }
+
+        // Check if the password matches (without encryption for this example)
+        if (user.password !== password) {
+            return res.status(400).json({ error: 'Invalid credentials' });
+        }
+
+        // Respond with the user data
+        res.json({
+            user: {
+                name: user.name,
+                profileImage: user.profileImage,
+            },
+        });
+    } catch (err) {
+        console.error('Error in POST login request', err);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
+
 module.exports = router;
