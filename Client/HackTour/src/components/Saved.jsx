@@ -1,45 +1,53 @@
 import React, { useState, useEffect } from 'react';
 
 function Saved() {
-  const [savedItems, setSavedItems] = useState([]);
-  const userId = localStorage.getItem('userId');
+  const [savedData, setSavedData] = useState([]);
+  const userId = localStorage.getItem('userId'); // Get the user ID from localStorage
 
   useEffect(() => {
     if (!userId) {
-      alert('Please log in to view your saved items.');
+      alert('Please log in to view saved entities.');
       return;
     }
 
+    // Fetch saved entities for the logged-in user
     fetch(`https://hacktour.onrender.com/saved/${userId}`)
-      .then((response) => response.json())
-      .then((data) => {
-        setSavedItems(data);
+      .then(response => {
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        return response.json();
       })
-      .catch((error) => {
-        console.error('Error fetching saved items:', error);
+      .then(data => {
+        setSavedData(data); // Set the saved entities data
+      })
+      .catch(error => {
+        console.error('Error fetching saved entities:', error);
+        setSavedData([]);
       });
   }, [userId]);
 
   return (
-    <div className="max-w-screen-2xl container mx-auto px-16 md:px-20 px-3 mt-9">
-      <h2 className="text-3xl font-semibold mb-4 text-white">Your Saved Items</h2>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {savedItems.length > 0 ? (
-          savedItems.map((item) => (
-            <div key={item._id} className="bg-gray-800 p-6 rounded-lg shadow-lg">
-              <h2 className="text-xl font-semibold mb-2 text-white">{item.title}</h2>
+    <div className="max-w-screen-2xl container mx-auto px-16 md:px-20 px-3 mt-8">
+      <h1 className="text-2xl font-bold text-white mb-4">Saved Entities</h1>
+
+      {savedData.length > 0 ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {savedData.map((item) => (
+            <div key={item._id} className="bg-gray-800 p-4 rounded-lg">
               <img
                 src={item.image}
-                alt={item.title}
-                className="w-full h-48 object-cover mb-4 rounded-md"
+                alt={item.name}
+                className="w-full h-48 object-cover mb-4 rounded"
               />
-              <p className="text-white">{item.description}</p>
+              <h2 className="text-xl text-white">{item.name}</h2>
+              <p className="text-gray-400">{item.description}</p>
             </div>
-          ))
-        ) : (
-          <p className="text-center text-white">No saved items found.</p>
-        )}
-      </div>
+          ))}
+        </div>
+      ) : (
+        <p className="text-white mt-5">You have no saved entities yet.</p>
+      )}
     </div>
   );
 }
