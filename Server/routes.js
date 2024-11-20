@@ -117,4 +117,14 @@ router.post('/signup', async (req, res) => {
     }
 });
 
+// Route to upload an image (optional)
+router.post('/upload', upload.single('image'), (req, res) => {
+    try {
+        res.json({ message: 'Image uploaded successfully', imageUrl: req.file.path });
+    } catch (err) {
+        console.error('Error in upload request', err);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
+
 module.exports = router;
