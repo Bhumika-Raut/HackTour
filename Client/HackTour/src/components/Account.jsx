@@ -6,7 +6,7 @@ function Account({ user, setUser }) {
     const [password, setPassword] = useState('');
     const [profileImage, setProfileImage] = useState(null);
     const [error, setError] = useState('');
-    const [isSignup, setIsSignup] = useState(true); // Toggle between signup and login
+    const [isSignup, setIsSignup] = useState(true);
 
     useEffect(() => {
         if (user) {
@@ -14,6 +14,13 @@ function Account({ user, setUser }) {
             setProfileImage(user.profileImage);
         }
     }, [user]);
+
+    const handleImageChange = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            setProfileImage(URL.createObjectURL(file));
+        }
+    };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -26,34 +33,33 @@ function Account({ user, setUser }) {
         try {
             let response;
             if (isSignup) {
-                // Signup request
-                response = await axios.post('https://hacktour.onrender.com/signup', {
-                    name,
-                    password,
-                    profileImage,
+                const formData = new FormData();
+                formData.append('name', name);
+                formData.append('password', password);
+                formData.append('profileImage', profileImage);
+
+                response = await axios.post('https://hacktour.onrender.com/signup', formData, {
+                    headers: { 'Content-Type': 'multipart/form-data' },
                 });
+
                 const signedInUser = { name, profileImage };
                 setUser(signedInUser);
                 localStorage.setItem('user', JSON.stringify(signedInUser));
                 setError('');
             } else {
-                // Login request
                 response = await axios.post('https://hacktour.onrender.com/login', {
                     name,
                     password,
                 });
 
-                const loggedInUser = {
-                    name: response.data.user.name,
-                    profileImage: response.data.user.profileImage,
-                };
+                const loggedInUser = { name: response.data.user.name, profileImage: response.data.user.profileImage };
                 setUser(loggedInUser);
                 localStorage.setItem('user', JSON.stringify(loggedInUser));
                 setError('');
             }
         } catch (error) {
             console.error(isSignup ? 'Sign up error:' : 'Login error:', error.response?.data?.error || error.message);
-            setError(error.response?.data?.error || 'An error occurred');
+            setError(error.response?.data?.error || 'Something went wrong.');
         }
     };
 
@@ -68,66 +74,43 @@ function Account({ user, setUser }) {
 
             {user ? (
                 <div className="text-center">
-                    <h2 className="text-2xl font-bold text-white">Welcome, {user.name}!</h2>
-                    {user.profileImage && (
-                        <img src={user.profileImage} alt="Profile" className="mt-4 rounded-full w-32 h-32" />
-                    )}
+                    <img
+                        src={profileImage || 'default-profile.jpg'}
+                        alt="Profile"
+                        className="w-24 h-24 rounded-full mb-4"
+                    />
+                    <h2 className="text-2xl text-white">{user.name}</h2>
                     <button
-                        className="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded mt-4"
                         onClick={handleSignOut}
+                        className="bg-red-500 text-white py-2 px-4 rounded mt-4"
                     >
                         Sign Out
                     </button>
                 </div>
             ) : (
-                <form onSubmit={handleSubmit} className="bg-white p-6 rounded shadow-lg">
-                    <div className="mb-4">
-                        <label className="block text-gray-700 text-sm font-bold mb-2">Name</label>
-                        <input
-                            type="text"
-                            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight"
-                            value={name}
-                            onChange={(e) => setName(e.target.value)}
-                        />
-                    </div>
-
-                    <div className="mb-4">
-                        <label className="block text-gray-700 text-sm font-bold mb-2">Password</label>
-                        <input
-                            type="password"
-                            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight"
-                            value={password}
-                            onChange={(e) => setPassword(e.target.value)}
-                        />
-                    </div>
-
-                    {isSignup && (
-                        <div className="mb-4">
-                            <label className="block text-gray-700 text-sm font-bold mb-2">Profile Image</label>
-                            <input
-                                type="file"
-                                className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight"
-                                onChange={(e) => setProfileImage(e.target.files[0])}
-                            />
-                        </div>
-                    )}
-
-                    <div className="flex items-center justify-between">
-                        <button
-                            className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
-                            type="submit"
-                        >
-                            {isSignup ? 'Sign Up' : 'Login'}
-                        </button>
-                        <button
-                            className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
-                            type="button"
-                            onClick={() => setIsSignup(!isSignup)}
-                        >
-                            {isSignup ? 'Go to Login' : 'Go to Sign Up'}
-                        </button>
-                    </div>
-
+                <form onSubmit={handleSubmit} className="w-80 bg-white p-6 rounded-lg shadow-lg">
+                    <input
+                        type="text"
+                        placeholder="Enter your name"
+                        value={name}
+                        onChange={(e) => setName(e.target.value)}
+                        className="w-full p-2 border border-gray-300 mb-4 rounded"
+                    />
+                    <input
+                        type="password"
+                        placeholder="Enter your password"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        className="w-full p-2 border border-gray-300 mb-4 rounded"
+                    />
+                    <input
+                        type="file"
+                        onChange={handleImageChange}
+                        className="w-full mb-4"
+                    />
+                    <button type="submit" className="bg-blue-500 text-white py-2 px-4 rounded w-full">
+                        {isSignup ? 'Sign Up' : 'Log In'}
+                    </button>
                     {error && <p className="text-red-500 mt-4">{error}</p>}
                 </form>
             )}

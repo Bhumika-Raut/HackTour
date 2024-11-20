@@ -1,150 +1,167 @@
 const express = require('express');
 const router = express.Router();
-const TechEntity = require('./schema');
-const RandomEntity = require('./randomSchema');
-const SavedEntity = require('./savedSchema');
-const Account = require('./accountSchema');
-const multer = require('multer');
+const TechEntity = require('./schema');            // Import other schema (assuming existing ones)
+const RandomEntity = require('./randomSchema');    // Random entity schema
+const SavedEntity = require('./savedSchema');      // Saved entity schema
+const Account = require('./accountSchema');        // Import account schema
+const multer = require('multer');                  // Import multer for file uploads
 
-// MongoDB Models for additional features
-const mongoose = require('mongoose');
-const UserModel = mongoose.model('User', new mongoose.Schema({
-  name: String,
-  email: String,
-}));
-const SavedItemsModel = mongoose.model('SavedItem', new mongoose.Schema({
-  userId: String,
-  title: String,
-  description: String,
-  image: String,
-}));
+// Middleware for parsing JSON and enabling CORS
+router.use(express.json());
+router.use(require('cors')());
 
-// Multer Configuration for File Uploads
+// Configure multer for file uploads
 const storage = multer.diskStorage({
-  destination: (req, file, cb) => cb(null, './uploads'),
-  filename: (req, file, cb) => cb(null, `${Date.now()}-${file.originalname}`),
+    destination: function (req, file, cb) {
+        cb(null, 'uploads/'); // Upload directory
+    },
+    filename: function (req, file, cb) {
+        cb(null, Date.now() + '-' + file.originalname); // Add timestamp to avoid name clashes
+    },
 });
-const upload = multer({ storage });
+const upload = multer({ storage: storage });
 
-// Routes
+// Route to fetch tech entities
+router.get('/tech', async (req, res) => {
+    try {
+        const tech = await TechEntity.find().limit(2000).exec();
+        res.json(tech);
+    } catch (err) {
+        console.error('Error in GET tech request', err);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
 
-// Signup Route (added in this implementation)
+// Route to fetch random home entities
+router.get('/home', async (req, res) => {
+    try {
+        const random = await RandomEntity.find().limit(2000).exec();
+        res.json(random);
+    } catch (err) {
+        console.error('Error in GET random request', err);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
+
+// Route to fetch saved entities by user ID
+router.get('/saved/:userId', async (req, res) => {
+    try {
+        const { userId } = req.params;
+        const saved = await SavedEntity.find({ userId }).limit(2000).exec();
+        res.json(saved);
+    } catch (err) {
+        console.error('Error in GET saved request', err);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
+
+// Route to like an entity
+router.post('/like/:id', async (req, res) => {
+    try {
+        const { id } = req.params;
+        const entity = await RandomEntity.findById(id);
+
+        if (!entity) {
+            return res.status(404).json({ error: 'Entity not found' });
+        }
+
+        entity.likes = (entity.likes || 0) + 1;  // Increment likes
+        await entity.save();
+
+        res.json({ message: 'Like updated successfully', likes: entity.likes });
+    } catch (err) {
+        console.error('Error in POST like request', err);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
+
+// Route to save an entity
+router.post('/saved/:id', async (req, res) => {
+    try {
+        const { id } = req.params;
+        const entity = await RandomEntity.findById(id);
+
+        if (!entity) {
+            return res.status(404).json({ error: 'Entity not found' });
+        }
+
+        const savedEntity = new SavedEntity({ ...entity.toObject(), userId: req.body.userId });
+        await savedEntity.save();
+
+        res.json({ message: 'Entity saved successfully' });
+    } catch (err) {
+        console.error('Error in POST saved request', err);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
+
+// Route to handle sign up
 router.post('/signup', async (req, res) => {
-  const { name, email } = req.body;
+    try {
+        const { name, password, profileImage } = req.body;
 
-  if (!name || !email) {
-    return res.status(400).json({ error: 'Name and email are required' });
-  }
+        // Check if the account already exists
+        const existingAccount = await Account.findOne({ name });
+        if (existingAccount) {
+            return res.status(400).json({ error: 'Account already exists' });
+        }
 
-  try {
-    const existingUser = await UserModel.findOne({ email });
-    if (existingUser) {
-      return res.status(400).json({ error: 'User already exists' });
+        // Create and save the new account
+        const newAccount = new Account({ name, password, profileImage });
+        await newAccount.save();
+
+        res.status(201).json({ message: 'Account created successfully' });
+    } catch (err) {
+        console.error('Error in POST signup request', err);
+        res.status(500).json({ error: 'Internal Server Error' });
     }
-
-    const newUser = new UserModel({ name, email });
-    await newUser.save();
-
-    res.status(201).json({ message: 'Signup successful', user: newUser });
-  } catch (err) {
-    res.status(500).json({ error: 'Failed to signup user' });
-  }
 });
 
-// Save Item Route (added in this implementation)
-router.post('/save-item', async (req, res) => {
-  const { userId, title, description, image } = req.body;
+// Route to handle login
+router.post('/login', async (req, res) => {
+    try {
+        const { name, password } = req.body;
 
-  if (!userId || !title || !description || !image) {
-    return res.status(400).json({ error: 'All fields are required' });
-  }
+        // Check if the account exists and credentials match
+        const account = await Account.findOne({ name, password });
+        if (!account) {
+            return res.status(400).json({ error: 'Invalid username or password' });
+        }
 
-  try {
-    const savedItem = new SavedItemsModel({ userId, title, description, image });
-    await savedItem.save();
-
-    res.status(201).json({ message: 'Item saved successfully', savedItem });
-  } catch (err) {
-    res.status(500).json({ error: 'Failed to save item' });
-  }
-});
-
-// Get Saved Items Route (added in this implementation)
-router.get('/get-saved-items/:userId', async (req, res) => {
-  const { userId } = req.params;
-
-  try {
-    const savedItems = await SavedItemsModel.find({ userId });
-    res.status(200).json({ savedItems });
-  } catch (err) {
-    res.status(500).json({ error: 'Failed to retrieve saved items' });
-  }
-});
-
-// Delete Saved Item Route (added in this implementation)
-router.delete('/delete-saved-item/:id', async (req, res) => {
-  const { id } = req.params;
-
-  try {
-    await SavedItemsModel.findByIdAndDelete(id);
-    res.status(200).json({ message: 'Item deleted successfully' });
-  } catch (err) {
-    res.status(500).json({ error: 'Failed to delete item' });
-  }
-});
-
-// Existing Route: Random Tech Entity Retrieval
-router.get('/random-tech', async (req, res) => {
-  try {
-    const entities = await TechEntity.find();
-    const randomIndex = Math.floor(Math.random() * entities.length);
-    res.status(200).json(entities[randomIndex]);
-  } catch (err) {
-    res.status(500).json({ error: 'Failed to retrieve random tech entity' });
-  }
-});
-
-// Existing Route: Save Randomized Entity
-router.post('/save-random', async (req, res) => {
-  const { userId, techId } = req.body;
-
-  try {
-    const techEntity = await TechEntity.findById(techId);
-    if (!techEntity) {
-      return res.status(404).json({ error: 'Tech entity not found' });
+        res.json({
+            message: 'Login successful',
+            user: { name: account.name, profileImage: account.profileImage, userId: account._id },
+        });
+    } catch (err) {
+        console.error('Error in POST login request', err);
+        res.status(500).json({ error: 'Internal Server Error' });
     }
-
-    const savedEntity = new SavedEntity({
-      userId,
-      techId,
-      title: techEntity.title,
-      description: techEntity.description,
-      image: techEntity.image,
-    });
-    await savedEntity.save();
-
-    res.status(201).json({ message: 'Entity saved successfully', savedEntity });
-  } catch (err) {
-    res.status(500).json({ error: 'Failed to save random entity' });
-  }
 });
 
-// Existing Route: Account Creation
-router.post('/create-account', async (req, res) => {
-  const { username, email } = req.body;
+// Route to handle profile image upload
+router.post('/upload-profile-image', upload.single('profileImage'), async (req, res) => {
+    try {
+        const { userId } = req.body;
+        const profileImage = req.file?.path;
 
-  try {
-    const account = new Account({ username, email });
-    await account.save();
-    res.status(201).json({ message: 'Account created successfully', account });
-  } catch (err) {
-    res.status(500).json({ error: 'Failed to create account' });
-  }
-});
+        if (!profileImage) {
+            return res.status(400).json({ error: 'Profile image is required' });
+        }
 
-// Existing Route: Upload a File
-router.post('/upload', upload.single('file'), (req, res) => {
-  res.status(200).json({ message: 'File uploaded successfully', file: req.file });
+        // Update the user's profile image
+        const account = await Account.findById(userId);
+        if (!account) {
+            return res.status(404).json({ error: 'User not found' });
+        }
+
+        account.profileImage = profileImage;
+        await account.save();
+
+        res.json({ message: 'Profile image uploaded successfully', profileImage });
+    } catch (err) {
+        console.error('Error in POST upload-profile-image request', err);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
 });
 
 module.exports = router;
