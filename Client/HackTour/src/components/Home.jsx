@@ -94,25 +94,22 @@ function Home() {
 
       {hackData.length > 0 ? (
         <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-9'>
-          {hackData.map((item, index) => (
-            <div key={item._id} className='bg-gray-800 p-6 rounded-lg shadow-lg relative'>
-              <h2 className='text-xl font-semibold mb-2 text-white'>{item.title}</h2>
-              <img
-                src={item.image}
-                alt={item.title}
-                className='w-full h-48 object-cover mb-4 rounded-md'
-              />
-              <p className='text-white'>{item.description}</p>
-              <div className="flex justify-end mt-4 absolute bottom-4 right-4">
-                <button onClick={() => handleSave(item)} className='text-2xl'>
-                  ❤️
-                </button>
-              </div>
+          {hackData.map((item) => (
+            <div key={item._id} className='bg-gray-800 p-4 rounded-lg'>
+              <img src={item.image} alt={item.title} className='w-full h-48 object-cover mb-4 rounded' />
+              <h2 className='text-xl text-white'>{item.title}</h2>
+              <p className='text-gray-400'>{item.description}</p>
+              <button
+                onClick={() => handleSave(item)}
+                className='mt-4 text-white bg-blue-500 px-4 py-2 rounded'
+              >
+                Save this Entity
+              </button>
             </div>
           ))}
         </div>
       ) : (
-        <p className='text-center text-white'>Loading...</p>
+        <p className='text-white mt-5'>No hacks available at the moment</p>
       )}
     </div>
   );
