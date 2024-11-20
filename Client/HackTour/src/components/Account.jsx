@@ -6,9 +6,8 @@ function Account({ user, setUser }) {
     const [password, setPassword] = useState('');
     const [profileImage, setProfileImage] = useState(null);
     const [error, setError] = useState('');
-    const [isSignup, setIsSignup] = useState(true);  // Toggle between signup and login modes
+    const [isSignup, setIsSignup] = useState(true);
 
-    // If user is logged in, display their data
     useEffect(() => {
         if (user) {
             setName(user.name);
@@ -16,7 +15,6 @@ function Account({ user, setUser }) {
         }
     }, [user]);
 
-    // Handle image upload for profile picture
     const handleImageChange = (e) => {
         const file = e.target.files[0];
         if (file) {
@@ -24,11 +22,9 @@ function Account({ user, setUser }) {
         }
     };
 
-    // Handle form submission (for both signup and login)
     const handleSubmit = async (e) => {
         e.preventDefault();
 
-        // Check if name and password are provided
         if (!name || !password) {
             setError('Name and password are required.');
             return;
@@ -37,26 +33,24 @@ function Account({ user, setUser }) {
         try {
             let response;
             if (isSignup) {
-                // For signup, handle file upload with FormData
                 const formData = new FormData();
                 formData.append('name', name);
                 formData.append('password', password);
-                if (profileImage) {
-                    formData.append('profileImage', profileImage);
-                }
+                formData.append('profileImage', profileImage);
 
                 response = await axios.post('https://hacktour.onrender.com/signup', formData, {
                     headers: { 'Content-Type': 'multipart/form-data' },
                 });
 
-                // Assuming server responds with user data (including profile image URL)
-                const signedInUser = { name, profileImage: response.data.profileImage };
+                const signedInUser = { name, profileImage };
                 setUser(signedInUser);
                 localStorage.setItem('user', JSON.stringify(signedInUser));
                 setError('');
             } else {
-                // For login, check credentials
-                response = await axios.post('https://hacktour.onrender.com/login', { name, password });
+                response = await axios.post('https://hacktour.onrender.com/login', {
+                    name,
+                    password,
+                });
 
                 const loggedInUser = { name: response.data.user.name, profileImage: response.data.user.profileImage };
                 setUser(loggedInUser);
@@ -69,7 +63,6 @@ function Account({ user, setUser }) {
         }
     };
 
-    // Handle sign out
     const handleSignOut = () => {
         setUser(null);
         localStorage.removeItem('user');
@@ -80,10 +73,9 @@ function Account({ user, setUser }) {
             <h1 className="text-4xl font-bold text-white mb-4 animate-bounce">{isSignup ? 'Sign Up' : 'Login'}</h1>
 
             {user ? (
-                // If user is logged in, show profile and logout button
                 <div className="text-center">
                     <img
-                        src={user.profileImage || 'default-profile.jpg'} // Display profile image
+                        src={profileImage || 'default-profile.jpg'}
                         alt="Profile"
                         className="w-24 h-24 rounded-full mb-4"
                     />
@@ -96,7 +88,6 @@ function Account({ user, setUser }) {
                     </button>
                 </div>
             ) : (
-                // If no user is logged in, show the signup/login form
                 <form onSubmit={handleSubmit} className="w-80 bg-white p-6 rounded-lg shadow-lg">
                     <input
                         type="text"
@@ -112,23 +103,22 @@ function Account({ user, setUser }) {
                         onChange={(e) => setPassword(e.target.value)}
                         className="w-full p-2 border border-gray-300 mb-4 rounded"
                     />
-                    {isSignup && (
-                        <input
-                            type="file"
-                            onChange={handleImageChange}
-                            className="w-full mb-4"
-                        />
-                    )}
+                    <input
+                        type="file"
+                        onChange={handleImageChange}
+                        className="w-full mb-4"
+                    />
                     <button type="submit" className="bg-blue-500 text-white py-2 px-4 rounded w-full">
                         {isSignup ? 'Sign Up' : 'Log In'}
                     </button>
-                    {error && <p className="text-red-500 mt-4">{error}</p>}
-                    <p
+                    {error && <p className="text-red-500 text-sm mt-2">{error}</p>}
+                    <button
+                        type="button"
                         onClick={() => setIsSignup(!isSignup)}
-                        className="text-blue-500 mt-4 cursor-pointer"
+                        className="text-blue-500 text-sm mt-2"
                     >
-                        {isSignup ? 'Already have an account? Login' : "Don't have an account? Sign up"}
-                    </p>
+                        {isSignup ? 'Already have an account? Log In' : 'Don’t have an account? Sign Up'}
+                    </button>
                 </form>
             )}
         </div>

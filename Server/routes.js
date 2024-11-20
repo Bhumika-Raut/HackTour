@@ -96,9 +96,10 @@ router.post('/saved/:id', async (req, res) => {
 });
 
 // Route to handle sign up
-router.post('/signup', async (req, res) => {
+router.post('/signup', upload.single('profileImage'), async (req, res) => {
     try {
-        const { name, password, profileImage } = req.body;
+        const { name, password } = req.body;
+        const profileImage = req.file ? req.file.path : null;
 
         // Check if the account already exists
         const existingAccount = await Account.findOne({ name });
@@ -113,16 +114,6 @@ router.post('/signup', async (req, res) => {
         res.status(201).json({ message: 'Account created successfully' });
     } catch (err) {
         console.error('Error in POST signup request', err);
-        res.status(500).json({ error: 'Internal Server Error' });
-    }
-});
-
-// Route to upload an image (optional)
-router.post('/upload', upload.single('image'), (req, res) => {
-    try {
-        res.json({ message: 'Image uploaded successfully', imageUrl: req.file.path });
-    } catch (err) {
-        console.error('Error in upload request', err);
         res.status(500).json({ error: 'Internal Server Error' });
     }
 });
