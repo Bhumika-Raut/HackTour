@@ -1,10 +1,11 @@
+// accountSchema.js
 const mongoose = require('mongoose');
 
 const accountSchema = new mongoose.Schema({
     name: {
         type: String,
         required: true,
-        unique: true, // Ensure that account names are unique
+        unique: true, 
         trim: true,
     },
     password: {
@@ -13,13 +14,16 @@ const accountSchema = new mongoose.Schema({
     },
     profileImage: {
         type: String,
-        required: false, // Profile image is optional
+        required: false, 
     },
     createdAt: {
         type: Date,
         default: Date.now,
     },
+    savedItems: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'SavedEntity', // Reference to SavedEntity model
+    }],
 });
 
-// Create and export the Account model
 module.exports = mongoose.model('Account', accountSchema);

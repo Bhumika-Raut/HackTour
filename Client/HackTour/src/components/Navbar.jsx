@@ -1,7 +1,13 @@
-import React from "react";
+import React, { useState } from "react";
 import { Link } from "react-router-dom";
 
 function Navbar({ onToggleTheme, theme, user, onSignOut }) {
+    const [isMobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+    const toggleMobileMenu = () => {
+        setMobileMenuOpen(!isMobileMenuOpen);
+    };
+
     const navItems = (
         <>
             <li>
@@ -18,12 +24,41 @@ function Navbar({ onToggleTheme, theme, user, onSignOut }) {
 
     return (
         <div className={`navbar px-20 ${theme === "dark" ? "bg-gray-700" : "bg-black text-white"}`}>
-            <div className="navbar-start">
+            <div className="navbar-start flex items-center">
+                {/* Mobile menu button */}
+                <button
+                    className="lg:hidden text-white mr-4"
+                    onClick={toggleMobileMenu}
+                >
+                    <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                        className="h-6 w-6"
+                    >
+                        <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M4 6h16M4 12h16M4 18h16"
+                        />
+                    </svg>
+                </button>
+
                 <Link className="text-2xl font-bold cursor-pointer" to="/">
                     HackTour
                 </Link>
             </div>
-            <div className="navbar-end">
+
+            <div className="navbar-end flex items-center">
+                {/* Mobile menu */}
+                <div
+                    className={`lg:hidden ${isMobileMenuOpen ? "block" : "hidden"} absolute top-16 left-0 w-full bg-black text-white`}
+                >
+                    <ul className="menu menu-vertical">{navItems}</ul>
+                </div>
+
                 <div className="navbar-center hidden lg:flex">
                     <ul className="menu menu-horizontal px-1">{navItems}</ul>
                     <label className="input input-bordered flex items-center gap-2 mr-4">
@@ -61,6 +96,7 @@ function Navbar({ onToggleTheme, theme, user, onSignOut }) {
                         </svg>
                     </label>
                 </div>
+
                 <div className="flex items-center ml-4">
                     {user ? (
                         <>
