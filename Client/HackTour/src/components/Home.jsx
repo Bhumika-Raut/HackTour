@@ -79,9 +79,7 @@ function Home() {
           {navItems.map((item, index) => (
             <div
               key={item.id}
-              className={`transition-transform duration-300 ease-in-out ${
-                index === activeIndex ? 'translate-x-0' : 'translate-x-full'
-              }`}
+              className={`transition-transform duration-300 ease-in-out ${index === activeIndex ? 'translate-x-0' : 'translate-x-full'}`}
             >
               <a href={item.link} className="text-white mx-2 p-2 hover:bg-gray-700 rounded">
                 {item.title}
