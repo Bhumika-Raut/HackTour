@@ -201,30 +201,21 @@ function Home() {
                 className="w-full h-48 object-cover rounded-lg group-hover:opacity-80 transition duration-500"
               />
               <div className="absolute inset-0 bg-black bg-opacity-50 opacity-0 group-hover:opacity-100 transition duration-500 flex items-center justify-center">
-                <p className="text-white text-lg font-semibold">{item.title}</p>
+                <p className="text-white">{item.title}</p>
               </div>
             </div>
-            <h2 className="text-2xl text-white font-bold mt-4">{item.title}</h2>
-            <p
-              className={`text-gray-400 text-sm mt-2 ${
-                item.isDescriptionVisible ? "" : "line-clamp-3"
-              } transition-all duration-300`}
-            >
-              {item.description}
-            </p>
-            <div className="text-yellow-400 mt-3 text-sm">
-              <span>❤️ Likes: {item.likes}</span>
+            {item.isDescriptionVisible && (
+              <p className="text-white mt-4">{item.description}</p>
+            )}
+            <div className="mt-4 flex items-center justify-between">
+              <span className="text-white">{item.likes} Likes</span>
+              <button
+                onClick={() => toggleDescription(index)}
+                className="text-blue-500 hover:underline"
+              >
+                {item.isDescriptionVisible ? "Hide Description" : "Show Description"}
+              </button>
             </div>
-            <button
-              className={`mt-4 px-5 py-2 rounded-full font-semibold text-white transition duration-300 ${
-                item.isDescriptionVisible
-                  ? "bg-red-500 hover:bg-red-600"
-                  : "bg-blue-500 hover:bg-blue-600"
-              }`}
-              onClick={() => toggleDescription(index)}
-            >
-              {item.isDescriptionVisible ? "Show Less" : "Read More"}
-            </button>
           </div>
         ))}
       </div>

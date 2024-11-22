@@ -40,7 +40,7 @@ router.get('/home', async (req, res) => {
 });
 
 
-router.post('/home', async (req, res) => {
+router.post('/add', async (req, res) => {
     try {
         const { title, description, imageUrl, likes = 0 } = req.body;
 
