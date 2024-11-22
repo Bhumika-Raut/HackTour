@@ -1,4 +1,4 @@
-// accountSchema.js
+
 const mongoose = require('mongoose');
 
 const accountSchema = new mongoose.Schema({
@@ -22,7 +22,7 @@ const accountSchema = new mongoose.Schema({
     },
     savedItems: [{
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'SavedEntity', // Reference to SavedEntity model
+        ref: 'SavedEntity', 
     }],
 });
 

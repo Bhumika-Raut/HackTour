@@ -39,6 +39,30 @@ router.get('/home', async (req, res) => {
     }
 });
 
+
+router.post('/home', async (req, res) => {
+    try {
+        const { title, description, imageUrl, likes = 0 } = req.body;
+
+        // Create a new entity with the provided data
+        const newEntity = new RandomEntity({
+            title,
+            description,
+            imageUrl,
+            likes,
+        });
+
+        // Save the new entity to the database
+        await newEntity.save();
+
+        res.status(201).json({ message: 'Entity added successfully', entity: newEntity });
+    } catch (err) {
+        console.error('Error in POST home request', err);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
+
+
 router.get('/saved/:userId', async (req, res) => {
     try {
         const { userId } = req.params;
@@ -91,7 +115,7 @@ router.post('/saved/:id', async (req, res) => {
 
         await savedEntity.save();
 
-        // Optionally, update the user's savedItems field in Account if you want to store it there
+        
         const user = await Account.findById(req.body.userId);
         if (user) {
             user.savedItems.push(savedEntity);

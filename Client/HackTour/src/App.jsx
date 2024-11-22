@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import Home from './components/Home';
-import Saved from './components/Saved';
+// import Saved from './components/Saved';
 import Account from './components/Account';
 
 function App() {
@@ -33,7 +33,7 @@ function App() {
                 <Navbar user={user} onToggleTheme={handleToggleTheme} theme={theme} onSignOut={handleSignOut} />
                 <Routes>
                     <Route path="/" element={<Home />} />
-                    <Route path="/saved" element={<Saved />} />
+                    {/* <Route path="/saved" element={<Saved />} /> */}
                     <Route path="/account" element={<Account user={user} setUser={setUser} />} />
                 </Routes>
             </div>
