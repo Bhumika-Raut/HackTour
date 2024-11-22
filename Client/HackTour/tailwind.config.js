@@ -2,9 +2,19 @@
 module.exports = {
   content: ["./src/**/*.{html,js}"],
   theme: {
-    extend: {},
+    extend: {
+      animation: {
+        fadeInScroll: "fadeInScroll 2s ease-out forwards",
+      },
+      keyframes: {
+        fadeInScroll: {
+          "0%": { opacity: 0, transform: "translateY(50px)" },
+          "100%": { opacity: 1, transform: "translateY(0)" },
+        },
+      },
+    },
   },
-plugins: [require("daisyui")],
+  plugins: [require("daisyui")],
   purge: {
     enabled: true,
     content: [
@@ -12,5 +22,4 @@ plugins: [require("daisyui")],
       "./src/**/*.{js,ts,jsx,tsx}",
     ],
   },
-  
-}
+};

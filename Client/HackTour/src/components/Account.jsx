@@ -69,7 +69,8 @@ function Account({ user, setUser }) {
     };
 
     return (
-        <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-r from-green-300 via-purple-500 to-purple-600">
+        <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-t from-black via-gray-500 to-white">
+
             <h1 className="text-4xl font-bold text-white mb-4 animate-bounce">{isSignup ? 'Sign Up' : 'Login'}</h1>
 
             {user ? (
