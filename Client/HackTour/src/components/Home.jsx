@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { motion } from "framer-motion";
 
 function Home() {
   const [hackData, setHackData] = useState([]);
@@ -10,18 +12,18 @@ function Home() {
     image: "",
     likes: 0,
   });
-  const [formVisible, setFormVisible] = useState(false); // To toggle the form visibility
-  const [searchTerm, setSearchTerm] = useState(""); // State for search term
+  const [formVisible, setFormVisible] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
+  const navigate = useNavigate();
 
   const shuffleArray = (array) => {
     return array.sort(() => Math.random() - 0.5);
   };
 
-  // Scroll state on scroll
   useEffect(() => {
     const handleScroll = () => {
       if (window.scrollY > 0) {
-        setWelcomeAnimation("slide-out"); // slide out
+        setWelcomeAnimation("slide-out");
         setHasScrolled(true);
       } else {
         setHasScrolled(false);
@@ -33,7 +35,6 @@ function Home() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  // Fetch data from the backend and shuffle it
   useEffect(() => {
     fetch("https://hacktour.onrender.com/home")
       .then((response) => {
@@ -51,14 +52,12 @@ function Home() {
       });
   }, []);
 
-  // Toggle description visibility
   const toggleDescription = (index) => {
     const updatedData = [...hackData];
     updatedData[index].isDescriptionVisible = !updatedData[index].isDescriptionVisible;
     setHackData(updatedData);
   };
 
-  // Handle form input change
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setNewHack((prev) => ({
@@ -67,11 +66,9 @@ function Home() {
     }));
   };
 
-  // Handle form submission
   const handleSubmit = (e) => {
     e.preventDefault();
 
-    // Sending POST request to backend
     fetch("https://hacktour.onrender.com/add", {
       method: "POST",
       headers: {
@@ -81,17 +78,16 @@ function Home() {
     })
       .then((response) => response.json())
       .then((data) => {
-        // After successful post, update hack data
         setHackData((prevData) => [data, ...prevData]);
-        setNewHack({ title: "", description: "", image: "", likes: 0 }); // Reset form
-        setFormVisible(false); // Hide the form after submission
+        setNewHack({ title: "", description: "", image: "", likes: 0 });
+        setFormVisible(false);
+        navigate("/");
       })
       .catch((error) => {
         console.error("Error adding hack:", error);
       });
   };
 
-  // Filter hack data based on search term
   const filteredHackData = hackData.filter((item) => {
     return (
       item.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -99,28 +95,34 @@ function Home() {
     );
   });
 
+  const handleCardClick = (id) => {
+    navigate(`/hack/${id}`);
+  };
+
   return (
-    <div className="max-w-screen-2xl mx-auto pt-8 md:pt-8 p-6 md:p-20">
+    <motion.div
+      className="max-w-screen-2xl mx-auto pt-8 md:pt-8 p-6 md:p-20"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 1 }}
+    >
       {/* Welcome Animation */}
-      <div
-        className={`fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-80 transition-transform duration-700 ${
-          welcomeAnimation === "slide-in" ? "translate-x-0" : "translate-x-full"
-        }`}
+      <motion.div
+        className={`fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-80`}
+        initial={{ x: welcomeAnimation === "slide-in" ? "-100vw" : "0" }}
+        animate={{ x: welcomeAnimation === "slide-in" ? "0" : "100vw" }}
+        transition={{ duration: 1 }}
       >
         <h1 className="text-white text-4xl md:text-6xl font-bold">HackTour!</h1>
-      </div>
-
-      {/* Navbar */}
-      <div
-        className={`fixed top-0 left-0 right-0 z-10 transition-shadow duration-300 ${
-          hasScrolled ? "shadow-[1px_4px_20px_rgba(1,1,2,0.9)]" : ""
-        }`}
-      >
-        {/* Navbar content can be added here */}
-      </div>
+      </motion.div>
 
       {/* Search Bar */}
-      <div className="mt-6">
+      <motion.div
+        className="mt-6"
+        initial={{ y: -50, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ delay: 0.3 }}
+      >
         <input
           type="text"
           className="px-4 py-2 w-full bg-gray-800 text-white rounded-full"
@@ -128,21 +130,30 @@ function Home() {
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
         />
-      </div>
+      </motion.div>
 
-      {/* Add New Hack Button */}
-      <div className="mt-6">
+      <motion.div
+        className="mt-6"
+        initial={{ scale: 0.8 }}
+        animate={{ scale: 1 }}
+        transition={{ duration: 0.5 }}
+      >
         <button
           onClick={() => setFormVisible(!formVisible)}
           className="px-5 py-2 bg-green-500 text-white rounded-full hover:bg-green-600 transition"
         >
           {formVisible ? "Cancel" : "Add New Hack"}
         </button>
-      </div>
+      </motion.div>
 
-      {/* Add Hack Form */}
       {formVisible && (
-        <form onSubmit={handleSubmit} className="mt-6 space-y-4">
+        <motion.form
+          onSubmit={handleSubmit}
+          className="mt-6 space-y-4"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.5 }}
+        >
           <input
             type="text"
             name="title"
@@ -184,15 +195,25 @@ function Home() {
           >
             Add Hack
           </button>
-        </form>
+        </motion.form>
       )}
 
       {/* Hack Data Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mt-12">
+      <motion.div
+        className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mt-12"
+        initial="hidden"
+        animate="visible"
+        variants={{
+          hidden: { opacity: 0 },
+          visible: { opacity: 1, transition: { staggerChildren: 0.2 } },
+        }}
+      >
         {filteredHackData.map((item, index) => (
-          <div
+          <motion.div
             key={item._id}
             className="bg-gray-900 p-6 rounded-lg shadow-xl hover:shadow-2xl transform hover:-translate-y-2 transition duration-500"
+            whileHover={{ scale: 1.05 }}
+            onClick={() => handleCardClick(item._id)} // Navigate to a new page on card click
           >
             <div className="relative group">
               <img
@@ -201,25 +222,30 @@ function Home() {
                 className="w-full h-48 object-cover rounded-lg group-hover:opacity-80 transition duration-500"
               />
               <div className="absolute inset-0 bg-black bg-opacity-50 opacity-0 group-hover:opacity-100 transition duration-500 flex items-center justify-center">
-                <p className="text-white">{item.title}</p>
+                <p className="text-white text-lg font-semibold">{item.title}</p>
               </div>
             </div>
-            {item.isDescriptionVisible && (
-              <p className="text-white mt-4">{item.description}</p>
-            )}
-            <div className="mt-4 flex items-center justify-between">
-              <span className="text-white">{item.likes} Likes</span>
-              <button
-                onClick={() => toggleDescription(index)}
-                className="text-blue-500 hover:underline"
-              >
-                {item.isDescriptionVisible ? "Hide Description" : "Show Description"}
-              </button>
+            <h2 className="text-2xl text-white font-bold mt-4">{item.title}</h2>
+            <p
+              className={`text-gray-400 text-sm mt-2 ${item.isDescriptionVisible ? "" : "line-clamp-3"} transition-all duration-300`}
+            >
+              {item.description}
+            </p>
+            <div className="text-yellow-400 mt-3 text-sm">
+              <span>❤️ Likes: {item.likes}</span>
             </div>
-          </div>
+            <button
+              className={`mt-4 px-5 py-2 rounded-full font-semibold text-white transition duration-300 ${
+                item.isDescriptionVisible ? "bg-red-500 hover:bg-red-600" : "bg-blue-500 hover:bg-blue-600"
+              }`}
+              onClick={() => toggleDescription(index)}
+            >
+              {item.isDescriptionVisible ? "Show Less" : "Read More"}
+            </button>
+          </motion.div>
         ))}
-      </div>
-    </div>
+      </motion.div>
+    </motion.div>
   );
 }
 
