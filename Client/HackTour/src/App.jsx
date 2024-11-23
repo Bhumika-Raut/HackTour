@@ -2,43 +2,41 @@ import { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import Home from './components/Home';
-// import Saved from './components/Saved';
 import Account from './components/Account';
 
 function App() {
-    const [theme, setTheme] = useState('light');
-    const [user, setUser] = useState(null);
+  const [theme, setTheme] = useState('light');
+  const [user, setUser] = useState(null);
 
-    // Check if a user is signed in on initial load
-    useEffect(() => {
-        const savedUser = JSON.parse(localStorage.getItem('user'));
-        if (savedUser) {
-            setUser(savedUser);
-        }
-    }, []);
+  useEffect(() => {
+    const savedUser = JSON.parse(localStorage.getItem('user'));
+    if (savedUser) {
+      setUser(savedUser);
+    }
+  }, []);
 
-    const handleSignOut = () => {
-        localStorage.removeItem('user');
-        setUser(null);
-    };
+  const handleSignOut = () => {
+    localStorage.removeItem('user');
+    setUser(null);
+  };
 
-    // Function to toggle theme
-    const handleToggleTheme = () => {
-        setTheme(prevTheme => (prevTheme === 'light' ? 'dark' : 'light'));
-    };
+  const handleToggleTheme = () => {
+    setTheme(prevTheme => (prevTheme === 'light' ? 'dark' : 'light'));
+  };
 
-    return (
-        <Router>
-            <div className={`min-h-screen ${theme === 'light' ? 'bg-white' : 'bg-gray-900'} transition duration-500`}>
-                <Navbar user={user} onToggleTheme={handleToggleTheme} theme={theme} onSignOut={handleSignOut} />
-                <Routes>
-                    <Route path="/" element={<Home />} />
-                    {/* <Route path="/saved" element={<Saved />} /> */}
-                    <Route path="/account" element={<Account user={user} setUser={setUser} />} />
-                </Routes>
-            </div>
-        </Router>
-    );
+  return (
+    <Router>
+      <div className={`min-h-screen ${theme === 'light' ? 'bg-white' : 'bg-gray-900'} transition duration-500`}>
+        <Navbar user={user} onToggleTheme={handleToggleTheme} theme={theme} onSignOut={handleSignOut} />
+        <Routes>
+          <Route path="/" element={<Home />} />
+         
+
+          <Route path="/account" element={<Account user={user} setUser={setUser} />} />
+        </Routes>
+      </div>
+    </Router>
+  );
 }
 
 export default App;

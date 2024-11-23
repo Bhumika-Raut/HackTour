@@ -97,7 +97,7 @@ function Navbar({ onToggleTheme, theme, user, onSignOut }) {
                 {searchResults.map((result, index) => (
                   <li key={index} className="text-sm">
                     <Link to={`/details/${result.id}`} className="text-gray-800 hover:text-indigo-500 transition-colors duration-300">
-                      {result.name} {/* Assuming each result has a 'name' property */}
+                      {result.name} 
                     </Link>
                   </li>
                 ))}

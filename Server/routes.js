@@ -44,7 +44,6 @@ router.post('/add', async (req, res) => {
     try {
         const { title, description, imageUrl, likes = 0 } = req.body;
 
-        // Create a new entity with the provided data
         const newEntity = new RandomEntity({
             title,
             description,
@@ -52,7 +51,6 @@ router.post('/add', async (req, res) => {
             likes,
         });
 
-        // Save the new entity to the database
         await newEntity.save();
 
         res.status(201).json({ message: 'Entity added successfully', entity: newEntity });
@@ -61,6 +59,7 @@ router.post('/add', async (req, res) => {
         res.status(500).json({ error: 'Internal Server Error' });
     }
 });
+
 
 
 router.get('/saved/:userId', async (req, res) => {
