@@ -9,6 +9,7 @@ const multer = require('multer');
 router.use(express.json());
 router.use(require('cors')());
 
+// Set up storage configuration for multer
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
         cb(null, 'uploads/'); 
@@ -17,8 +18,10 @@ const storage = multer.diskStorage({
         cb(null, Date.now() + '-' + file.originalname); 
     },
 });
+
 const upload = multer({ storage: storage });
 
+// Fetch all tech entities (limit to 2000)
 router.get('/tech', async (req, res) => {
     try {
         const tech = await TechEntity.find().limit(2000).exec();
@@ -29,6 +32,7 @@ router.get('/tech', async (req, res) => {
     }
 });
 
+// Fetch random entities for the homepage
 router.get('/home', async (req, res) => {
     try {
         const random = await RandomEntity.find().limit(2000).exec();
@@ -39,7 +43,7 @@ router.get('/home', async (req, res) => {
     }
 });
 
-
+// Add new entity (POST request)
 router.post('/add', async (req, res) => {
     try {
         const { title, description, imageUrl, likes = 0 } = req.body;
@@ -60,6 +64,7 @@ router.post('/add', async (req, res) => {
     }
 });
 
+// Signup Route (POST request)
 router.post('/signup', async (req, res) => {
     try {
         const { name, password } = req.body;
@@ -79,7 +84,7 @@ router.post('/signup', async (req, res) => {
     }
 });
 
-// Login Route
+// Login Route (POST request)
 router.post('/login', async (req, res) => {
     try {
         const { name, password } = req.body;
@@ -99,6 +104,8 @@ router.post('/login', async (req, res) => {
         res.status(500).json({ error: 'Internal Server Error' });
     }
 });
+
+// Like an entity (POST request)
 router.post('/like/:id', async (req, res) => {
     const { userId } = req.body; // Get userId from request
     const { id } = req.params; // Entity ID
@@ -118,10 +125,12 @@ router.post('/like/:id', async (req, res) => {
             return res.status(400).send({ message: 'You already liked this entity' });
         }
 
+        // Add user to the likedBy array in the RandomEntity
         randomEntity.likedBy.push(userId);
         randomEntity.likes += 1;
         await randomEntity.save();
 
+        // Add entity to the user's likedEntities
         user.likedEntities.push(id);
         await user.save();
 
@@ -130,6 +139,8 @@ router.post('/like/:id', async (req, res) => {
         res.status(500).send({ message: 'Server error', error });
     }
 });
+
+// Get all liked entities for a user (GET request)
 router.get('/account/liked-entities/:userId', async (req, res) => {
     const { userId } = req.params;
 
@@ -146,6 +157,4 @@ router.get('/account/liked-entities/:userId', async (req, res) => {
     }
 });
 
-
 module.exports = router;
-
