@@ -13,6 +13,7 @@ const Home = () => {
     likes: 0,
   });
   const navigate = useNavigate();
+  const userId = "USER_ID"; // Replace this with actual user ID from authentication
 
   useEffect(() => {
     fetch("https://hacktour.onrender.com/home")
@@ -57,6 +58,31 @@ const Home = () => {
     );
   };
 
+  const handleLike = async (id) => {
+    try {
+      const response = await fetch(`https://hacktour.onrender.com/like/${id}`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ userId }), // Pass userId in request body
+      });
+
+      if (response.ok) {
+        const { likes } = await response.json();
+        setHackData((prev) =>
+          prev.map((item) =>
+            item._id === id ? { ...item, likes } : item
+          )
+        );
+      } else {
+        alert("You already liked this entity!");
+      }
+    } catch (error) {
+      console.error("Error liking entity:", error);
+    }
+  };
+
   return (
     <motion.div
       className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-800 text-white"
@@ -87,7 +113,11 @@ const Home = () => {
             handleSubmit={handleSubmit}
           />
         )}
-        <HackGrid hacks={filteredHacks} toggleDescription={toggleDescription} />
+        <HackGrid
+          hacks={filteredHacks}
+          toggleDescription={toggleDescription}
+          handleLike={handleLike}
+        />
       </motion.div>
     </motion.div>
   );
@@ -118,75 +148,81 @@ const Form = ({ newHack, handleInputChange, handleSubmit }) => (
     animate={{ opacity: 1 }}
     transition={{ duration: 0.5 }}
   >
-    <div className="space-y-4">
+    <div className="mb-4">
       <input
         type="text"
         name="title"
-        placeholder="Hack Title"
-        className="w-full p-3 rounded-lg bg-gray-800 text-white"
+        placeholder="Title"
+        className="w-full p-3 rounded-lg"
         value={newHack.title}
         onChange={handleInputChange}
       />
-      <textarea
-        name="description"
-        placeholder="Hack Description"
-        className="w-full p-3 rounded-lg bg-gray-800 text-white"
-        value={newHack.description}
-        onChange={handleInputChange}
-      />
+    </div>
+    <div className="mb-4">
       <input
         type="text"
         name="image"
         placeholder="Image URL"
-        className="w-full p-3 rounded-lg bg-gray-800 text-white"
+        className="w-full p-3 rounded-lg"
         value={newHack.image}
         onChange={handleInputChange}
       />
-      <button
-        type="submit"
-        className="px-4 py-2 bg-blue-600 hover:bg-blue-500 rounded-lg"
-      >
-        Add Hack
-      </button>
     </div>
+    <div className="mb-4">
+      <textarea
+        name="description"
+        placeholder="Description"
+        className="w-full p-3 rounded-lg"
+        value={newHack.description}
+        onChange={handleInputChange}
+      />
+    </div>
+    <button
+      type="submit"
+      className="px-4 py-2 bg-green-600 hover:bg-green-500 rounded-lg"
+    >
+      Add Hack
+    </button>
   </motion.form>
 );
 
-const HackGrid = ({ hacks, toggleDescription }) => (
-  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-    {hacks.map((item, index) => (
+const HackGrid = ({ hacks, toggleDescription, handleLike }) => (
+  <motion.div
+    className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6"
+    initial={{ y: 20, opacity: 0 }}
+    animate={{ y: 0, opacity: 1 }}
+    transition={{ delay: 0.2 }}
+  >
+    {hacks.map((hack, index) => (
       <motion.div
-        key={item._id}
-        className="bg-gray-900 p-6 rounded-lg shadow-md hover:shadow-lg"
-        whileHover={{ scale: 1.05 }}
+        key={hack._id}
+        className="bg-gray-700 rounded-lg p-4 shadow-lg"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 0.3 }}
       >
-        <div className="relative">
-          <img
-            src={item.image}
-            alt={item.title}
-            className="w-full h-48 object-cover rounded-lg"
-          />
-          <div className="absolute top-2 right-2 bg-black bg-opacity-60 text-white px-2 py-1 rounded">
-            {item.likes} ❤️
-          </div>
+        <img src={hack.image} alt={hack.title} className="w-full h-48 object-cover rounded-lg" />
+        <h2 className="text-xl font-bold mt-2">{hack.title}</h2>
+        {hack.isDescriptionVisible && (
+          <p className="text-sm mt-2">{hack.description}</p>
+        )}
+        <div className="flex justify-between items-center mt-4">
+          <button
+            onClick={() => toggleDescription(index)}
+            className="text-blue-500"
+          >
+            {hack.isDescriptionVisible ? "Hide" : "Show"} Description
+          </button>
+          <button
+            onClick={() => handleLike(hack._id)}
+            className="text-red-500"
+          >
+            Like ({hack.likes})
+          </button>
         </div>
-        <h2 className="text-xl font-semibold mt-4">{item.title}</h2>
-        <p
-          className={`mt-2 text-gray-400 ${
-            item.isDescriptionVisible ? "" : "line-clamp-3"
-          }`}
-        >
-          {item.description}
-        </p>
-        <button
-          className="mt-4 px-4 py-2 bg-red-600 hover:bg-red-500 rounded-lg"
-          onClick={() => toggleDescription(index)}
-        >
-          {item.isDescriptionVisible ? "Hide" : "Show"} Description
-        </button>
       </motion.div>
     ))}
-  </div>
+  </motion.div>
 );
 
 export default Home;
