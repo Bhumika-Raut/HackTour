@@ -8,10 +8,11 @@ function Account({ user, setUser }) {
     const [isSignup, setIsSignup] = useState(true);
 
     useEffect(() => {
-        if (user) {
-            setName(user.name);
+        const savedUser = localStorage.getItem('user');
+        if (savedUser) {
+            setUser(JSON.parse(savedUser));
         }
-    }, [user]);
+    }, [setUser]);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -24,26 +25,15 @@ function Account({ user, setUser }) {
         try {
             let response;
             if (isSignup) {
-                response = await axios.post('https://hacktour.onrender.com/signup', {
-                    name,
-                    password,
-                });
-
-                const signedInUser = { name };
-                setUser(signedInUser);
-                localStorage.setItem('user', JSON.stringify(signedInUser));
-                setError('');
+                response = await axios.post('https://hacktour.onrender.com/signup', { name, password });
+                setUser({ name });
+                localStorage.setItem('user', JSON.stringify({ name }));
             } else {
-                response = await axios.post('https://hacktour.onrender.com/login', {
-                    name,
-                    password,
-                });
-
-                const loggedInUser = { name: response.data.user.name };
-                setUser(loggedInUser);
-                localStorage.setItem('user', JSON.stringify(loggedInUser));
-                setError('');
+                response = await axios.post('https://hacktour.onrender.com/login', { name, password });
+                setUser({ name: response.data.user.name });
+                localStorage.setItem('user', JSON.stringify({ name: response.data.user.name }));
             }
+            setError('');
         } catch (error) {
             console.error(isSignup ? 'Sign up error:' : 'Login error:', error.response?.data?.error || error.message);
             setError(error.response?.data?.error || 'Something went wrong.');
@@ -61,7 +51,7 @@ function Account({ user, setUser }) {
 
             {user ? (
                 <div className="text-center">
-                    <h2 className="text-2xl text-white mb-4">{user.name}</h2>
+                    <h2 className="text-2xl text-white mb-4">Welcome, {user.name}!</h2>
                     <button
                         onClick={handleSignOut}
                         className="bg-red-500 text-white py-2 px-4 rounded"

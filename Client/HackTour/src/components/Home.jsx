@@ -48,9 +48,13 @@ const Home = () => {
   );
 
   const toggleDescription = (index) => {
-    const updated = [...hackData];
-    updated[index].isDescriptionVisible = !updated[index].isDescriptionVisible;
-    setHackData(updated);
+    setHackData((prev) =>
+      prev.map((item, i) =>
+        i === index
+          ? { ...item, isDescriptionVisible: !item.isDescriptionVisible }
+          : item
+      )
+    );
   };
 
   return (
@@ -60,10 +64,7 @@ const Home = () => {
       animate={{ opacity: 1 }}
       transition={{ duration: 1 }}
     >
-      {/* Header */}
       <Header searchTerm={searchTerm} setSearchTerm={setSearchTerm} />
-
-      {/* Main Section */}
       <motion.div
         className="max-w-6xl mx-auto p-6"
         initial={{ y: 20, opacity: 0 }}
@@ -74,12 +75,11 @@ const Home = () => {
           <h1 className="text-4xl font-bold">HackTour</h1>
           <button
             onClick={() => setFormVisible(!formVisible)}
-            className="px-4 py-2 bg-green-600 hover:bg-green-500 rounded-lg transition"
+            className="px-4 py-2 bg-green-600 hover:bg-green-500 rounded-lg"
           >
             {formVisible ? "Cancel" : "Add Hack"}
           </button>
         </div>
-
         {formVisible && (
           <Form
             newHack={newHack}
@@ -87,11 +87,7 @@ const Home = () => {
             handleSubmit={handleSubmit}
           />
         )}
-
-        <HackGrid
-          hacks={filteredHacks}
-          toggleDescription={toggleDescription}
-        />
+        <HackGrid hacks={filteredHacks} toggleDescription={toggleDescription} />
       </motion.div>
     </motion.div>
   );
@@ -107,7 +103,7 @@ const Header = ({ searchTerm, setSearchTerm }) => (
     <input
       type="text"
       placeholder="Search hacks..."
-      className="w-full p-3 rounded-lg bg-gray-700 text-white focus:outline-none"
+      className="w-full p-3 rounded-lg bg-gray-700 text-white"
       value={searchTerm}
       onChange={(e) => setSearchTerm(e.target.value)}
     />
@@ -161,7 +157,7 @@ const HackGrid = ({ hacks, toggleDescription }) => (
     {hacks.map((item, index) => (
       <motion.div
         key={item._id}
-        className="bg-gray-900 p-6 rounded-lg shadow-md hover:shadow-lg transition duration-300"
+        className="bg-gray-900 p-6 rounded-lg shadow-md hover:shadow-lg"
         whileHover={{ scale: 1.05 }}
       >
         <div className="relative">
@@ -170,7 +166,7 @@ const HackGrid = ({ hacks, toggleDescription }) => (
             alt={item.title}
             className="w-full h-48 object-cover rounded-lg"
           />
-          <div className="absolute top-2 right-2 bg-black bg-opacity-60 text-white text-xs px-2 py-1 rounded">
+          <div className="absolute top-2 right-2 bg-black bg-opacity-60 text-white px-2 py-1 rounded">
             {item.likes} ❤️
           </div>
         </div>

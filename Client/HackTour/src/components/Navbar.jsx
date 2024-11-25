@@ -129,7 +129,7 @@ function Navbar({ onToggleTheme, theme, user, onSignOut }) {
           {/* User Profile or Sign In */}
           {user ? (
             <div className="flex items-center space-x-4">
-              <img src={user.profileImage} alt="Profile" className="h-8 w-8 rounded-full" />
+              {/* <img src={user.profileImage} alt="Profile" className="h-8 w-8 rounded-full" /> */}
               <span>{user.name}</span>
               <button onClick={onSignOut} className="text-red-500 hover:text-red-700">
                 Sign Out
