@@ -166,6 +166,30 @@ router.post('/login', async (req, res) => {
         res.status(500).json({ error: 'Internal Server Error' });
     }
 });
+router.post('/like/:id', async (req, res) => {
+    const { userId } = req.body; 
+    const { id } = req.params; 
+
+    try {
+        const randomEntity = await RandomEntity.findById(id);
+        if (!randomEntity) {
+            return res.status(404).send({ message: 'Entity not found' });
+        }
+
+        if (randomEntity.likedBy.includes(userId)) {
+            return res.status(400).send({ message: 'You already liked this entity' });
+        }
+
+        randomEntity.likedBy.push(userId);
+        randomEntity.likes += 1;
+
+        await randomEntity.save();
+
+        res.status(200).send({ message: 'Entity liked successfully', likes: randomEntity.likes });
+    } catch (error) {
+        res.status(500).send({ message: 'Server error', error });
+    }
+});
 
 module.exports = router;
 
