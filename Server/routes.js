@@ -128,17 +128,16 @@ router.post('/saved/:id', async (req, res) => {
     }
 });
 
-router.post('/signup', upload.single('profileImage'), async (req, res) => {
+router.post('/signup', async (req, res) => {
     try {
         const { name, password } = req.body;
-        const profileImage = req.file ? req.file.path : null;
 
         const existingAccount = await Account.findOne({ name });
         if (existingAccount) {
             return res.status(400).json({ error: 'Account already exists' });
         }
 
-        const newAccount = new Account({ name, password, profileImage });
+        const newAccount = new Account({ name, password });
         await newAccount.save();
 
         res.status(201).json({ message: 'Account created successfully' });
