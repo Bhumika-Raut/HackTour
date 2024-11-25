@@ -4,15 +4,29 @@ import axios from 'axios';
 function Account({ user, setUser }) {
     const [name, setName] = useState('');
     const [password, setPassword] = useState('');
+    const [likedEntities, setLikedEntities] = useState([]);
     const [error, setError] = useState('');
     const [isSignup, setIsSignup] = useState(true);
 
     useEffect(() => {
         const savedUser = localStorage.getItem('user');
         if (savedUser) {
-            setUser(JSON.parse(savedUser));
+            const parsedUser = JSON.parse(savedUser);
+            setUser(parsedUser);
+            fetchLikedEntities(parsedUser.id);
         }
     }, [setUser]);
+
+    const fetchLikedEntities = async (userId) => {
+        try {
+            const response = await axios.get(
+                `https://hacktour.onrender.com/liked-entities/${userId}`
+            );
+            setLikedEntities(response.data);
+        } catch (err) {
+            console.error('Error fetching liked entities:', err);
+        }
+    };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -25,13 +39,25 @@ function Account({ user, setUser }) {
         try {
             let response;
             if (isSignup) {
-                response = await axios.post('https://hacktour.onrender.com/signup', { name, password });
-                setUser({ name });
-                localStorage.setItem('user', JSON.stringify({ name }));
+                response = await axios.post(
+                    'https://hacktour.onrender.com/signup',
+                    { name, password }
+                );
+                const userData = { name, id: response.data.id };
+                setUser(userData);
+                localStorage.setItem('user', JSON.stringify(userData));
             } else {
-                response = await axios.post('https://hacktour.onrender.com/login', { name, password });
-                setUser({ name: response.data.user.name });
-                localStorage.setItem('user', JSON.stringify({ name: response.data.user.name }));
+                response = await axios.post(
+                    'https://hacktour.onrender.com/login',
+                    { name, password }
+                );
+                const userData = {
+                    name: response.data.user.name,
+                    id: response.data.user._id,
+                };
+                setUser(userData);
+                localStorage.setItem('user', JSON.stringify(userData));
+                fetchLikedEntities(userData.id);
             }
             setError('');
         } catch (error) {
@@ -43,6 +69,7 @@ function Account({ user, setUser }) {
     const handleSignOut = () => {
         setUser(null);
         localStorage.removeItem('user');
+        setLikedEntities([]);
     };
 
     return (
@@ -58,6 +85,18 @@ function Account({ user, setUser }) {
                     >
                         Logout
                     </button>
+                    <div className="mt-6">
+                        <h3 className="text-xl font-bold text-white mb-2">
+                            Liked Entities:
+                        </h3>
+                        <ul className="text-white">
+                            {likedEntities.map((entity) => (
+                                <li key={entity._id} className="mb-2">
+                                    {entity.title}
+                                </li>
+                            ))}
+                        </ul>
+                    </div>
                 </div>
             ) : (
                 <form onSubmit={handleSubmit} className="w-80 bg-white p-6 rounded-lg shadow-lg">

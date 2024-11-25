@@ -60,73 +60,6 @@ router.post('/add', async (req, res) => {
     }
 });
 
-
-
-router.get('/saved/:userId', async (req, res) => {
-    try {
-        const { userId } = req.params;
-        const saved = await SavedEntity.find({ userId }).limit(2000).exec();
-        res.json(saved);
-    } catch (err) {
-        console.error('Error in GET saved request', err);
-        res.status(500).json({ error: 'Internal Server Error' });
-    }
-});
-
-router.post('/like/:id', async (req, res) => {
-    try {
-        const { id } = req.params;
-        const entity = await RandomEntity.findById(id);
-
-        if (!entity) {
-            return res.status(404).json({ error: 'Entity not found' });
-        }
-
-        entity.likes = (entity.likes || 0) + 1;  
-        await entity.save();
-
-        res.json({ message: 'Like updated successfully', likes: entity.likes });
-    } catch (err) {
-        console.error('Error in POST like request', err);
-        res.status(500).json({ error: 'Internal Server Error' });
-    }
-});
-
-router.post('/saved/:id', async (req, res) => {
-    try {
-        const { id } = req.params;
-        const entity = await RandomEntity.findById(id);
-
-        if (!entity) {
-            return res.status(404).json({ error: 'Entity not found' });
-        }
-
-        // Check if the user already saved this entity
-        const existingSavedEntity = await SavedEntity.findOne({ userId: req.body.userId, entityId: id });
-        if (existingSavedEntity) {
-            return res.status(400).json({ error: 'Entity already saved by this user' });
-        }
-
-        const savedEntity = new SavedEntity({
-            ...entity.toObject(),
-            userId: req.body.userId,
-        });
-
-        await savedEntity.save();
-
-        
-        const user = await Account.findById(req.body.userId);
-        if (user) {
-            user.savedItems.push(savedEntity);
-            await user.save();
-        }
-
-        res.json({ message: 'Entity saved successfully' });
-    } catch (err) {
-        console.error('Error in POST saved request', err);
-        res.status(500).json({ error: 'Internal Server Error' });
-    }
-});
 router.post('/signup', async (req, res) => {
     try {
         const { name, password } = req.body;
@@ -167,13 +100,18 @@ router.post('/login', async (req, res) => {
     }
 });
 router.post('/like/:id', async (req, res) => {
-    const { userId } = req.body; 
-    const { id } = req.params; 
+    const { userId } = req.body; // Get userId from request
+    const { id } = req.params; // Entity ID
 
     try {
         const randomEntity = await RandomEntity.findById(id);
         if (!randomEntity) {
             return res.status(404).send({ message: 'Entity not found' });
+        }
+
+        const user = await Account.findById(userId);
+        if (!user) {
+            return res.status(404).send({ message: 'User not found' });
         }
 
         if (randomEntity.likedBy.includes(userId)) {
@@ -182,14 +120,32 @@ router.post('/like/:id', async (req, res) => {
 
         randomEntity.likedBy.push(userId);
         randomEntity.likes += 1;
-
         await randomEntity.save();
+
+        user.likedEntities.push(id);
+        await user.save();
 
         res.status(200).send({ message: 'Entity liked successfully', likes: randomEntity.likes });
     } catch (error) {
         res.status(500).send({ message: 'Server error', error });
     }
 });
+router.get('/account/liked-entities/:userId', async (req, res) => {
+    const { userId } = req.params;
+
+    try {
+        const user = await Account.findById(userId).populate('likedEntities');
+        if (!user) {
+            return res.status(404).json({ error: 'User not found' });
+        }
+
+        res.status(200).json(user.likedEntities);
+    } catch (err) {
+        console.error('Error fetching liked entities:', err);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
+
 
 module.exports = router;
 
