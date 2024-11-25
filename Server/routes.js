@@ -127,7 +127,6 @@ router.post('/saved/:id', async (req, res) => {
         res.status(500).json({ error: 'Internal Server Error' });
     }
 });
-
 router.post('/signup', async (req, res) => {
     try {
         const { name, password } = req.body;
@@ -147,6 +146,7 @@ router.post('/signup', async (req, res) => {
     }
 });
 
+// Login Route
 router.post('/login', async (req, res) => {
     try {
         const { name, password } = req.body;
@@ -160,12 +160,7 @@ router.post('/login', async (req, res) => {
             return res.status(400).json({ error: 'Invalid credentials' });
         }
 
-        res.json({
-            user: {
-                name: user.name,
-                profileImage: user.profileImage,
-            },
-        });
+        res.json({ user });
     } catch (err) {
         console.error('Error in POST login request', err);
         res.status(500).json({ error: 'Internal Server Error' });
@@ -173,3 +168,4 @@ router.post('/login', async (req, res) => {
 });
 
 module.exports = router;
+

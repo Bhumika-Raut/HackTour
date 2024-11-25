@@ -29,9 +29,8 @@ function App() {
       <div className={`min-h-screen ${theme === 'light' ? 'bg-white' : 'bg-gray-900'} transition duration-500`}>
         <Navbar user={user} onToggleTheme={handleToggleTheme} theme={theme} onSignOut={handleSignOut} />
         <Routes>
-          <Route path="/" element={<Home />} />
-         
-
+          {/* Conditionally render either the Account or Home component */}
+          <Route path="/" element={user ? <Home /> : <Account user={user} setUser={setUser} />} />
           <Route path="/account" element={<Account user={user} setUser={setUser} />} />
         </Routes>
       </div>
