@@ -4,23 +4,14 @@ import axios from 'axios';
 function Account({ user, setUser }) {
     const [name, setName] = useState('');
     const [password, setPassword] = useState('');
-    const [profileImage, setProfileImage] = useState(null);
     const [error, setError] = useState('');
     const [isSignup, setIsSignup] = useState(true);
 
     useEffect(() => {
         if (user) {
             setName(user.name);
-            setProfileImage(user.profileImage);
         }
     }, [user]);
-
-    const handleImageChange = (e) => {
-        const file = e.target.files[0];
-        if (file) {
-            setProfileImage(URL.createObjectURL(file));
-        }
-    };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -33,16 +24,12 @@ function Account({ user, setUser }) {
         try {
             let response;
             if (isSignup) {
-                const formData = new FormData();
-                formData.append('name', name);
-                formData.append('password', password);
-                formData.append('profileImage', profileImage);
-
-                response = await axios.post('https://hacktour.onrender.com/signup', formData, {
-                    headers: { 'Content-Type': 'multipart/form-data' },
+                response = await axios.post('https://hacktour.onrender.com/signup', {
+                    name,
+                    password,
                 });
 
-                const signedInUser = { name, profileImage };
+                const signedInUser = { name };
                 setUser(signedInUser);
                 localStorage.setItem('user', JSON.stringify(signedInUser));
                 setError('');
@@ -52,7 +39,7 @@ function Account({ user, setUser }) {
                     password,
                 });
 
-                const loggedInUser = { name: response.data.user.name, profileImage: response.data.user.profileImage };
+                const loggedInUser = { name: response.data.user.name };
                 setUser(loggedInUser);
                 localStorage.setItem('user', JSON.stringify(loggedInUser));
                 setError('');
@@ -70,22 +57,16 @@ function Account({ user, setUser }) {
 
     return (
         <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-t from-black via-gray-500 to-white">
-
-            <h1 className="text-4xl font-bold text-white mb-4 animate-bounce">{isSignup ? 'Sign Up' : 'Login'}</h1>
+            <h1 className="text-4xl font-bold text-white mb-4">{isSignup ? 'Sign Up' : 'Login'}</h1>
 
             {user ? (
                 <div className="text-center">
-                    <img
-                        src={profileImage || 'default-profile.jpg'}
-                        alt="Profile"
-                        className="w-24 h-24 rounded-full mb-4"
-                    />
-                    <h2 className="text-2xl text-white">{user.name}</h2>
+                    <h2 className="text-2xl text-white mb-4">{user.name}</h2>
                     <button
                         onClick={handleSignOut}
-                        className="bg-red-500 text-white py-2 px-4 rounded mt-4"
+                        className="bg-red-500 text-white py-2 px-4 rounded"
                     >
-                        Sign Out
+                        Logout
                     </button>
                 </div>
             ) : (
@@ -103,11 +84,6 @@ function Account({ user, setUser }) {
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
                         className="w-full p-2 border border-gray-300 mb-4 rounded"
-                    />
-                    <input
-                        type="file"
-                        onChange={handleImageChange}
-                        className="w-full mb-4"
                     />
                     <button type="submit" className="bg-blue-500 text-white py-2 px-4 rounded w-full">
                         {isSignup ? 'Sign Up' : 'Log In'}
