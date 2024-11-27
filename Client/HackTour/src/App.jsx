@@ -8,6 +8,7 @@ function App() {
   const [theme, setTheme] = useState('light');
   const [user, setUser] = useState(null);
 
+  // Load user from localStorage on mount
   useEffect(() => {
     const savedUser = JSON.parse(localStorage.getItem('user'));
     if (savedUser) {
@@ -15,23 +16,43 @@ function App() {
     }
   }, []);
 
+  // Handle sign-out action
   const handleSignOut = () => {
     localStorage.removeItem('user');
     setUser(null);
   };
 
+  // Toggle between light and dark theme
   const handleToggleTheme = () => {
     setTheme(prevTheme => (prevTheme === 'light' ? 'dark' : 'light'));
   };
 
+  // Apply the theme globally when it changes
+  useEffect(() => {
+    document.body.classList.toggle('bg-gray-900', theme === 'dark');
+    document.body.classList.toggle('bg-white', theme === 'light');
+    document.body.classList.toggle('text-white', theme === 'dark');
+    document.body.classList.toggle('text-gray-800', theme === 'light');
+  }, [theme]);
+
   return (
     <Router>
-      <div className={`min-h-screen ${theme === 'light' ? 'bg-white' : 'bg-gray-900'} transition duration-500`}>
-        <Navbar user={user} onToggleTheme={handleToggleTheme} theme={theme} onSignOut={handleSignOut} />
+      <div className={`min-h-screen transition duration-500 ${theme === 'dark' ? 'bg-gray-900 text-white' : 'bg-white text-gray-800'}`}>
+        <Navbar 
+          user={user} 
+          onToggleTheme={handleToggleTheme} 
+          theme={theme} 
+          onSignOut={handleSignOut} 
+        />
         <Routes>
-          {/* Conditionally render either the Account or Home component */}
-          <Route path="/" element={user ? <Home /> : <Account user={user} setUser={setUser} />} />
-          <Route path="/account" element={<Account user={user} setUser={setUser} />} />
+          <Route 
+            path="/" 
+            element={user ? <Home user={user} theme={theme} /> : <Account setUser={setUser} />} 
+          />
+          <Route 
+            path="/account" 
+            element={<Account user={user} setUser={setUser} />} 
+          />
         </Routes>
       </div>
     </Router>
