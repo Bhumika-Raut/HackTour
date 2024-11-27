@@ -46,4 +46,18 @@
     }
   }
   
+  .my-masonry-grid {
+    display: flex;
+    margin-left: -30px; /* Adjust according to your gap */
+    width: auto;
+  }
+  .my-masonry-grid_column {
+    padding-left: 30px; /* Adjust according to your gap */
+    background-clip: padding-box;
+  }
+  
+  .my-masonry-grid_column > div {
+    margin-bottom: 30px; /* Adjust according to your gap */
+  }
+
   

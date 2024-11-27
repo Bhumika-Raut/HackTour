@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
+import InfiniteScroll from "react-infinite-scroll-component";
+import Masonry from "react-masonry-css";
 
-const Home = () => {
+const Home = ({ theme }) => {
   const [hackData, setHackData] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [formVisible, setFormVisible] = useState(false);
@@ -12,15 +14,25 @@ const Home = () => {
     image: "",
     likes: 0,
   });
+  const [currentPage, setCurrentPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
+  const hacksPerPage = 6;
   const navigate = useNavigate();
-  const userId = "USER_ID"; // Replace this with actual user ID from authentication
+  const userId = "USER_ID";
 
   useEffect(() => {
-    fetch("https://hacktour.onrender.com/home")
-      .then((res) => res.json())
-      .then((data) => setHackData(data.sort(() => Math.random() - 0.5)))
-      .catch((err) => console.error(err));
+    fetchHacks();
   }, []);
+
+  const fetchHacks = (page = 1) => {
+    fetch(`https://hacktour.onrender.com/home?page=${page}&limit=${hacksPerPage}`)
+      .then((res) => res.json())
+      .then((data) => {
+        setHackData((prev) => [...prev, ...data]);
+        setHasMore(data.length > 0);
+      })
+      .catch((err) => console.error(err));
+  };
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -65,7 +77,7 @@ const Home = () => {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ userId }), // Pass userId in request body
+        body: JSON.stringify({ userId }),
       });
 
       if (response.ok) {
@@ -83,20 +95,27 @@ const Home = () => {
     }
   };
 
+  const loadMoreHacks = () => {
+    const nextPage = currentPage + 1;
+    fetchHacks(nextPage);
+    setCurrentPage(nextPage);
+  };
+
+  const breakpointColumnsObj = {
+    default: 3,
+    1100: 2,
+    700: 1
+  };
+
   return (
-    <motion.div
-      className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-800 text-white"
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      transition={{ duration: 1 }}
-    >
-      <Header searchTerm={searchTerm} setSearchTerm={setSearchTerm} />
-      <motion.div
-        className="max-w-6xl mx-auto p-6"
-        initial={{ y: 20, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        transition={{ delay: 0.2 }}
-      >
+    <div className={`min-h-screen transition duration-500 ${theme === "dark" ? "bg-gray-900 text-white" : "bg-white text-gray-800"}`}>
+  <Header searchTerm={searchTerm} setSearchTerm={setSearchTerm} theme={theme} />
+  <motion.div
+    className="max-w-6xl mx-auto p-6"
+    initial={{ y: 20, opacity: 0 }}
+    animate={{ y: 0, opacity: 1 }}
+    transition={{ delay: 0.2 }}
+  >
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-4xl font-bold">HackTour</h1>
           <button
@@ -111,39 +130,59 @@ const Home = () => {
             newHack={newHack}
             handleInputChange={handleInputChange}
             handleSubmit={handleSubmit}
+            theme={theme}
           />
         )}
-        <HackGrid
-          hacks={filteredHacks}
-          toggleDescription={toggleDescription}
-          handleLike={handleLike}
-        />
+        <InfiniteScroll
+          dataLength={filteredHacks.length}
+          next={loadMoreHacks}
+          hasMore={hasMore}
+          loader={<h4>Loading more hacks...</h4>}
+          endMessage={<p>No more hacks to show.</p>}
+        >
+          <Masonry
+            breakpointCols={breakpointColumnsObj}
+            className="my-masonry-grid"
+            columnClassName="my-masonry-grid_column"
+          >
+            {filteredHacks.map((hack, index) => (
+              <HackCard
+                key={hack._id}
+                hack={hack}
+                toggleDescription={toggleDescription}
+                handleLike={handleLike}
+                theme={theme}
+              />
+            ))}
+          </Masonry>
+        </InfiniteScroll>
       </motion.div>
-    </motion.div>
+    </div>
   );
 };
 
-const Header = ({ searchTerm, setSearchTerm }) => (
+const Header = ({ searchTerm, setSearchTerm, theme }) => (
   <motion.div
-    className="bg-gray-800 py-4 px-6 sticky top-0 z-10 shadow-md"
+    className={`py-4 px-6 sticky top-0 z-10 shadow-md ${theme === "dark" ? "bg-gray-800" : "bg-gray-200"}`}
     initial={{ y: -50, opacity: 0 }}
     animate={{ y: 0, opacity: 1 }}
     transition={{ duration: 0.5 }}
   >
     <input
-      type="text"
-      placeholder="Search hacks..."
-      className="w-full p-3 rounded-lg bg-gray-700 text-white"
-      value={searchTerm}
-      onChange={(e) => setSearchTerm(e.target.value)}
-    />
+  type="text"
+  placeholder="Search hacks..."
+  value={searchTerm}
+  onChange={(e) => setSearchTerm(e.target.value)}
+  className="w-full p-2 mb-6 rounded-md border border-gray-300 focus:ring-2 focus:ring-indigo-500"
+/>
+
   </motion.div>
 );
 
-const Form = ({ newHack, handleInputChange, handleSubmit }) => (
+const Form = ({ newHack, handleInputChange, handleSubmit, theme }) => (
   <motion.form
     onSubmit={handleSubmit}
-    className="bg-gray-700 p-6 rounded-lg mb-6"
+    className={`p-6 rounded-lg mb-6 ${theme === "dark" ? "bg-gray-700" : "bg-gray-100"}`}
     initial={{ opacity: 0 }}
     animate={{ opacity: 1 }}
     transition={{ duration: 0.5 }}
@@ -186,42 +225,28 @@ const Form = ({ newHack, handleInputChange, handleSubmit }) => (
   </motion.form>
 );
 
-const HackGrid = ({ hacks, toggleDescription, handleLike }) => (
+const HackCard = ({ hack, toggleDescription, handleLike, theme }) => (
   <motion.div
-    className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6"
-    initial={{ y: 20, opacity: 0 }}
-    animate={{ y: 0, opacity: 1 }}
-    transition={{ delay: 0.2 }}
+    className={`rounded-lg shadow-md p-4 ${theme === "dark" ? "bg-gray-800" : "bg-white"}`}
+    whileHover={{ scale: 1.05 }}
   >
-    {hacks.map((hack, index) => (
-      <motion.div
-        key={hack._id}
-        className="bg-gray-700 rounded-lg p-4 shadow-lg"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 0.3 }}
+    <img src={hack.image} alt={hack.title} className="w-full rounded-lg mb-4" />
+    <h2 className="text-xl font-semibold">{hack.title}</h2>
+    <p className="text-sm">{hack.description}</p>
+    <div className="flex justify-between items-center mt-4">
+      <button
+        onClick={() => toggleDescription(hack._id)}
+        className="text-indigo-600 hover:text-indigo-400"
       >
-        <img src={hack.image} alt={hack.title} className="w-full h-48 object-cover rounded-lg" />
-        <h2 className="text-xl font-bold mt-2">{hack.title}</h2>
-        {hack.isDescriptionVisible && (
-          <p className="text-sm mt-2">{hack.description}</p>
-        )}
-        <div className="flex justify-between items-center mt-4">
-          <button
-            onClick={() => toggleDescription(index)}
-            className="text-blue-500"
-          >
-            {hack.isDescriptionVisible ? "Hide" : "Show"} Description
-          </button>
-          <button
-            onClick={() => handleLike(hack._id)}
-            className="text-red-500"
-          >
-            Like ({hack.likes})
-          </button>
-        </div>
-      </motion.div>
-    ))}
+        {hack.isDescriptionVisible ? "Hide Description" : "Show Description"}
+      </button>
+      <button
+        onClick={() => handleLike(hack._id)}
+        className="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-lg"
+      >
+        Like ({hack.likes})
+      </button>
+    </div>
   </motion.div>
 );
 
