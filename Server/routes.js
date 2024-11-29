@@ -1,5 +1,6 @@
 const express = require('express');
 const router = express.Router();
+const mongoose = require('mongoose'); // Added mongoose import
 const TechEntity = require('./schema');            
 const RandomEntity = require('./randomSchema');    
 const SavedEntity = require('./savedSchema');      
@@ -51,7 +52,7 @@ router.post('/add', async (req, res) => {
         const newEntity = new RandomEntity({
             title,
             description,
-            imageUrl,
+            image: imageUrl, // Corrected field name
             likes,
         });
 

@@ -59,10 +59,10 @@ const Home = ({ theme, user }) => {
     item.title.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const toggleDescription = (index) => {
+  const toggleDescription = (id) => {
     setHackData((prev) =>
-      prev.map((item, i) =>
-        i === index
+      prev.map((item) =>
+        item._id === id
           ? { ...item, isDescriptionVisible: !item.isDescriptionVisible }
           : item
       )
@@ -231,31 +231,41 @@ const Form = ({ newHack, handleInputChange, handleSubmit, theme }) => (
   </motion.form>
 );
 
-const HackCard = ({ hack, toggleDescription, handleLike, theme }) => (
-  <motion.div
-    className={`rounded-lg shadow-md p-4 ${
-      theme === "dark" ? "bg-gray-800" : "bg-white"
-    }`}
-    whileHover={{ scale: 1.05 }}
-  >
-    <img src={hack.image} alt={hack.title} className="w-full rounded-lg mb-4" />
-    <h2 className="text-xl font-semibold">{hack.title}</h2>
-    <p className="text-sm">{hack.description}</p>
-    <div className="flex justify-between items-center mt-4">
+const HackCard = ({ hack, toggleDescription, handleLike, theme }) => {
+  const maxDescriptionLength = 100; // Maximum characters to show initially
+
+  return (
+    <motion.div
+      className={`rounded-lg shadow-md p-4 ${
+        theme === "dark" ? "bg-gray-800" : "bg-white"
+      }`}
+      whileHover={{ scale: 1.05 }}
+    >
+      <img src={hack.image} alt={hack.title} className="w-full rounded-lg mb-4" />
+      <h2 className="text-xl font-semibold">{hack.title}</h2>
+      <p className="text-sm">
+        {hack.isDescriptionVisible
+          ? hack.description // Show full description
+          : `${hack.description.slice(0, maxDescriptionLength)}${
+              hack.description.length > maxDescriptionLength ? "..." : ""
+            }`} {/* Show truncated description */}
+      </p>
+      <div className="flex justify-between items-center mt-4">
       <button
-        onClick={() => toggleDescription(hack._id)}
-        className="text-indigo-600 hover:text-indigo-400"
-      >
-        {hack.isDescriptionVisible ? "Hide Description" : "Show Description"}
-      </button>
-      <button
-        onClick={() => handleLike(hack._id)}
-        className="px-4 py-2 bg-gradient-to-r from-gray-700 via-gray-800 to-black hover:from-gray-800 hover:via-black hover:to-gray-900 text-white rounded-lg"
-      >
-        Like ({hack.likes})
-      </button>
-    </div>
-  </motion.div>
-);
+          onClick={() => toggleDescription(hack._id)}
+          className="text-indigo-600 hover:text-indigo-400"
+        >
+          {hack.isDescriptionVisible ? "Hide Description" : "Show Description"}
+        </button>
+        <button
+          onClick={() => handleLike(hack._id)}
+          className="px-4 py-2 bg-gradient-to-r from-gray-700 via-gray-800 to-black hover:from-gray-800 hover:via-black hover:to-gray-900 text-white rounded-lg"
+        >
+          Like ({hack.likes})
+        </button>
+      </div>
+    </motion.div>
+  );
+};
 
 export default Home;
