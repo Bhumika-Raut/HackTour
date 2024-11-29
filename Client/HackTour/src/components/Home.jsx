@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import InfiniteScroll from "react-infinite-scroll-component";
 import Masonry from "react-masonry-css";
 
-const Home = ({ theme, user }) => {
+const Home = ({ theme }) => {
   const [hackData, setHackData] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [formVisible, setFormVisible] = useState(false);
@@ -45,24 +45,24 @@ const Home = ({ theme, user }) => {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(newHack),
     })
-    .then((res) => res.json())
-    .then((newItem) => {
-      setHackData((prev) => [newItem, ...prev]);
-      setNewHack({ title: "", description: "", image: "", likes: 0 });
-      setFormVisible(false);
-      navigate("/");
-    })
-    .catch((err) => console.error(err));
+      .then((res) => res.json())
+      .then((newItem) => {
+        setHackData((prev) => [newItem, ...prev]);
+        setNewHack({ title: "", description: "", image: "", likes: 0 });
+        setFormVisible(false);
+        navigate("/");
+      })
+      .catch((err) => console.error(err));
   };
 
   const filteredHacks = hackData.filter((item) =>
     item.title.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const toggleDescription = (id) => {
+  const toggleDescription = (index) => {
     setHackData((prev) =>
-      prev.map((item) =>
-        item._id === id
+      prev.map((item, i) =>
+        i === index
           ? { ...item, isDescriptionVisible: !item.isDescriptionVisible }
           : item
       )
@@ -76,9 +76,9 @@ const Home = ({ theme, user }) => {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ userId: user?.id }),  // Use user ID from props
+        body: JSON.stringify({ userId: "YOUR_USER_ID" }), // Replace YOUR_USER_ID with the actual user ID
       });
-
+  
       if (response.ok) {
         const { likes } = await response.json();
         setHackData((prev) =>
@@ -93,7 +93,7 @@ const Home = ({ theme, user }) => {
       console.error("Error liking entity:", error);
     }
   };
-
+  
   const loadMoreHacks = () => {
     const nextPage = currentPage + 1;
     fetchHacks(nextPage);
@@ -122,11 +122,12 @@ const Home = ({ theme, user }) => {
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-4xl font-bold">HackTour</h1>
           <button
-            onClick={() => setFormVisible(!formVisible)}
-            className="px-4 py-2 bg-gradient-to-r from-teal-700 via-teal-800 to-gray-900 hover:from-teal-800 hover:via-teal-900 hover:to-black text-white rounded-lg"
-          >
-            {formVisible ? "Cancel" : "Add Hack"}
-          </button>
+  onClick={() => setFormVisible(!formVisible)}
+  className="px-4 py-2 bg-gradient-to-r from-teal-700 via-teal-800 to-gray-900 hover:from-teal-800 hover:via-teal-900 hover:to-black text-white rounded-lg"
+>
+  {formVisible ? "Cancel" : "Add Hack"}
+</button>
+
         </div>
         {formVisible && (
           <Form
@@ -140,7 +141,7 @@ const Home = ({ theme, user }) => {
           dataLength={filteredHacks.length}
           next={loadMoreHacks}
           hasMore={hasMore}
-          loader={<h4>Loading hacks...</h4>}
+          loader={<h4>Loading more hacks...</h4>}
           endMessage={<p>No more hacks to show.</p>}
         >
           <Masonry
@@ -182,6 +183,7 @@ const Header = ({ searchTerm, setSearchTerm, theme }) => (
     />
   </motion.div>
 );
+
 
 const Form = ({ newHack, handleInputChange, handleSubmit, theme }) => (
   <motion.form
@@ -225,47 +227,39 @@ const Form = ({ newHack, handleInputChange, handleSubmit, theme }) => (
     <button
       type="submit"
       className="px-4 py-2 bg-gradient-to-r from-purple-700 via-indigo-800 to-gray-900 hover:from-indigo-700 hover:via-purple-900 hover:to-black text-white rounded-lg"
-    >
+>
+    
       Add Hack
     </button>
   </motion.form>
 );
 
-const HackCard = ({ hack, toggleDescription, handleLike, theme }) => {
-  const maxDescriptionLength = 100; // Maximum characters to show initially
-
-  return (
-    <motion.div
-      className={`rounded-lg shadow-md p-4 ${
-        theme === "dark" ? "bg-gray-800" : "bg-white"
-      }`}
-      whileHover={{ scale: 1.05 }}
-    >
-      <img src={hack.image} alt={hack.title} className="w-full rounded-lg mb-4" />
-      <h2 className="text-xl font-semibold">{hack.title}</h2>
-      <p className="text-sm">
-        {hack.isDescriptionVisible
-          ? hack.description // Show full description
-          : `${hack.description.slice(0, maxDescriptionLength)}${
-              hack.description.length > maxDescriptionLength ? "..." : ""
-            }`} {/* Show truncated description */}
-      </p>
-      <div className="flex justify-between items-center mt-4">
+const HackCard = ({ hack, toggleDescription, handleLike, theme }) => (
+  <motion.div
+    className={`rounded-lg shadow-md p-4 ${
+      theme === "dark" ? "bg-gray-800" : "bg-white"
+    }`}
+    whileHover={{ scale: 1.05 }}
+  >
+    <img src={hack.image} alt={hack.title} className="w-full rounded-lg mb-4" />
+    <h2 className="text-xl font-semibold">{hack.title}</h2>
+    <p className="text-sm">{hack.description}</p>
+    <div className="flex justify-between items-center mt-4">
       <button
-          onClick={() => toggleDescription(hack._id)}
-          className="text-indigo-600 hover:text-indigo-400"
-        >
-          {hack.isDescriptionVisible ? "Hide Description" : "Show Description"}
-        </button>
-        <button
-          onClick={() => handleLike(hack._id)}
-          className="px-4 py-2 bg-gradient-to-r from-gray-700 via-gray-800 to-black hover:from-gray-800 hover:via-black hover:to-gray-900 text-white rounded-lg"
-        >
-          Like ({hack.likes})
-        </button>
-      </div>
-    </motion.div>
-  );
-};
+        onClick={() => toggleDescription(hack._id)}
+        className="text-indigo-600 hover:text-indigo-400"
+      >
+        {hack.isDescriptionVisible ? "Hide Description" : "Show Description"}
+      </button>
+      <button
+  onClick={() => handleLike(hack._id)}
+  className="px-4 py-2 bg-gradient-to-r from-gray-700 via-gray-800 to-black hover:from-gray-800 hover:via-black hover:to-gray-900 text-white rounded-lg"
+>
+  Like ({hack.likes})
+</button>
+
+    </div>
+  </motion.div>
+);
 
 export default Home;
