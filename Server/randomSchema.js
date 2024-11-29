@@ -1,12 +1,14 @@
+const mongoose = require('mongoose'); 
+
 const RandomSchema = new mongoose.Schema({
     title: String,
-    image: String, // Ensure the field name matches with what you're using in the frontend
+    image: String, 
     description: String,
     likes: {
         type: Number,
         default: 0,
     },
-    likedBy: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Account' }], // Ensure this field is present
+    likedBy: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Account' }], 
 });
 
 const RandomEntity = mongoose.model('random-collections', RandomSchema); 
