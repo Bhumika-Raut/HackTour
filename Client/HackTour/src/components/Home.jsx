@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import InfiniteScroll from "react-infinite-scroll-component";
 import Masonry from "react-masonry-css";
 
-const Home = ({ theme }) => {
+const Home = ({ theme, user }) => {
   const [hackData, setHackData] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [formVisible, setFormVisible] = useState(false);
@@ -45,14 +45,14 @@ const Home = ({ theme }) => {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(newHack),
     })
-      .then((res) => res.json())
-      .then((newItem) => {
-        setHackData((prev) => [newItem, ...prev]);
-        setNewHack({ title: "", description: "", image: "", likes: 0 });
-        setFormVisible(false);
-        navigate("/");
-      })
-      .catch((err) => console.error(err));
+    .then((res) => res.json())
+    .then((newItem) => {
+      setHackData((prev) => [newItem, ...prev]);
+      setNewHack({ title: "", description: "", image: "", likes: 0 });
+      setFormVisible(false);
+      navigate("/");
+    })
+    .catch((err) => console.error(err));
   };
 
   const filteredHacks = hackData.filter((item) =>
@@ -76,7 +76,7 @@ const Home = ({ theme }) => {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ userId: "USER_ID" }),
+        body: JSON.stringify({ userId: user?.id }),  // Use user ID from props
       });
 
       if (response.ok) {
@@ -122,12 +122,11 @@ const Home = ({ theme }) => {
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-4xl font-bold">HackTour</h1>
           <button
-  onClick={() => setFormVisible(!formVisible)}
-  className="px-4 py-2 bg-gradient-to-r from-teal-700 via-teal-800 to-gray-900 hover:from-teal-800 hover:via-teal-900 hover:to-black text-white rounded-lg"
->
-  {formVisible ? "Cancel" : "Add Hack"}
-</button>
-
+            onClick={() => setFormVisible(!formVisible)}
+            className="px-4 py-2 bg-gradient-to-r from-teal-700 via-teal-800 to-gray-900 hover:from-teal-800 hover:via-teal-900 hover:to-black text-white rounded-lg"
+          >
+            {formVisible ? "Cancel" : "Add Hack"}
+          </button>
         </div>
         {formVisible && (
           <Form
@@ -141,7 +140,7 @@ const Home = ({ theme }) => {
           dataLength={filteredHacks.length}
           next={loadMoreHacks}
           hasMore={hasMore}
-          loader={<h4>Loading more hacks...</h4>}
+          loader={<h4>Loading hacks...</h4>}
           endMessage={<p>No more hacks to show.</p>}
         >
           <Masonry
@@ -183,7 +182,6 @@ const Header = ({ searchTerm, setSearchTerm, theme }) => (
     />
   </motion.div>
 );
-
 
 const Form = ({ newHack, handleInputChange, handleSubmit, theme }) => (
   <motion.form
@@ -227,8 +225,7 @@ const Form = ({ newHack, handleInputChange, handleSubmit, theme }) => (
     <button
       type="submit"
       className="px-4 py-2 bg-gradient-to-r from-purple-700 via-indigo-800 to-gray-900 hover:from-indigo-700 hover:via-purple-900 hover:to-black text-white rounded-lg"
->
-    
+    >
       Add Hack
     </button>
   </motion.form>
@@ -252,12 +249,11 @@ const HackCard = ({ hack, toggleDescription, handleLike, theme }) => (
         {hack.isDescriptionVisible ? "Hide Description" : "Show Description"}
       </button>
       <button
-  onClick={() => handleLike(hack._id)}
-  className="px-4 py-2 bg-gradient-to-r from-gray-700 via-gray-800 to-black hover:from-gray-800 hover:via-black hover:to-gray-900 text-white rounded-lg"
->
-  Like ({hack.likes})
-</button>
-
+        onClick={() => handleLike(hack._id)}
+        className="px-4 py-2 bg-gradient-to-r from-gray-700 via-gray-800 to-black hover:from-gray-800 hover:via-black hover:to-gray-900 text-white rounded-lg"
+      >
+        Like ({hack.likes})
+      </button>
     </div>
   </motion.div>
 );
