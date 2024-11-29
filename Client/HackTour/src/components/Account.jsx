@@ -31,8 +31,9 @@ const Account = ({ setUser: setAppUser }) => {
 
   const fetchLikedEntities = async (userId) => {
     try {
+      if (!userId) throw new Error('User ID is missing'); // Ensure userId is present
       const response = await axios.get(
-        `https://hacktour.onrender.com/liked-entities/${userId}`
+        `https://hacktour.onrender.com/account/liked-entities/${userId}`
       );
       setLikedEntities(response.data);
     } catch (err) {
