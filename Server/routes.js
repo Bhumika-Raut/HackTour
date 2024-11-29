@@ -145,7 +145,7 @@ router.get('/account/liked-entities/:userId', async (req, res) => {
     const { userId } = req.params;
 
     try {
-        const user = await Account.findById(userId).populate('likedEntities');
+        const user = await Account.findById(userId).populate('likedEntities'); // Ensure populate is used
         if (!user) {
             return res.status(404).json({ error: 'User not found' });
         }

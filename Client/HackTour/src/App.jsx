@@ -45,13 +45,13 @@ function App() {
           onSignOut={handleSignOut} 
         />
         <Routes>
-          <Route 
+        <Route 
             path="/" 
             element={user ? <Home user={user} theme={theme} /> : <Account setUser={setUser} />} 
           />
           <Route 
             path="/account" 
-            element={<Account user={user} setUser={setUser} />} 
+            element={<Account setUser={setUser} />} 
           />
         </Routes>
       </div>
