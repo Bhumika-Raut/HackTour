@@ -71,29 +71,28 @@ const Home = ({ theme }) => {
 
   const handleLike = async (id) => {
     try {
-        const response = await fetch(`https://hacktour.onrender.com/like/${id}`, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify({ userId: "YOUR_USER_ID" }), // Replace YOUR_USER_ID with the actual user ID
-        });
+      const response = await fetch(`https://hacktour.onrender.com/like/${id}`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ userId: "USER_ID" }),
+      });
 
-        if (response.ok) {
-            const { likes } = await response.json();
-            setHackData((prev) =>
-                prev.map((item) =>
-                    item._id === id ? { ...item, likes } : item
-                )
-            );
-        } else {
-            const error = await response.json();
-            alert(error.message);
-        }
+      if (response.ok) {
+        const { likes } = await response.json();
+        setHackData((prev) =>
+          prev.map((item) =>
+            item._id === id ? { ...item, likes } : item
+          )
+        );
+      } else {
+        alert("You already liked this entity!");
+      }
     } catch (error) {
-        console.error("Error liking entity:", error);
+      console.error("Error liking entity:", error);
     }
-};
+  };
 
   const loadMoreHacks = () => {
     const nextPage = currentPage + 1;
