@@ -76,9 +76,9 @@ const Home = ({ theme }) => {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ userId: "USER_ID" }),
+        body: JSON.stringify({ userId: "YOUR_USER_ID" }), // Replace YOUR_USER_ID with the actual user ID
       });
-
+  
       if (response.ok) {
         const { likes } = await response.json();
         setHackData((prev) =>
@@ -93,7 +93,7 @@ const Home = ({ theme }) => {
       console.error("Error liking entity:", error);
     }
   };
-
+  
   const loadMoreHacks = () => {
     const nextPage = currentPage + 1;
     fetchHacks(nextPage);

@@ -105,10 +105,9 @@ router.post('/login', async (req, res) => {
     }
 });
 
-// Like an entity (POST request)
 router.post('/like/:id', async (req, res) => {
-    const { userId } = req.body; // Get userId from request
-    const { id } = req.params; // Entity ID
+    const { userId } = req.body; 
+    const { id } = req.params; 
 
     try {
         const randomEntity = await RandomEntity.findById(id);
@@ -139,6 +138,7 @@ router.post('/like/:id', async (req, res) => {
         res.status(500).send({ message: 'Server error', error });
     }
 });
+
 
 // Get all liked entities for a user (GET request)
 router.get('/account/liked-entities/:userId', async (req, res) => {
