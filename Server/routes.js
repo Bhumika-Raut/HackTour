@@ -104,22 +104,24 @@ router.post('/login', async (req, res) => {
         res.status(500).json({ error: 'Internal Server Error' });
     }
 });
-
 router.post('/like/:id', async (req, res) => {
     const { userId } = req.body; 
     const { id } = req.params; 
 
     try {
+        // Find the entity by ID
         const randomEntity = await RandomEntity.findById(id);
         if (!randomEntity) {
             return res.status(404).send({ message: 'Entity not found' });
         }
 
+        // Find the user by ID
         const user = await Account.findById(userId);
         if (!user) {
             return res.status(404).send({ message: 'User not found' });
         }
 
+        // Check if user has already liked the entity
         if (randomEntity.likedBy.includes(userId)) {
             return res.status(400).send({ message: 'You already liked this entity' });
         }
