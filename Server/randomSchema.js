@@ -1,8 +1,8 @@
-const mongoose = require('mongoose'); 
+const mongoose = require('mongoose');
 
 const RandomSchema = new mongoose.Schema({
     title: String,
-    image: String, 
+    image: String,
     description: String,
     likes: {
         type: Number,
