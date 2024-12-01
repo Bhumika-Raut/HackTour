@@ -70,36 +70,37 @@ const Home = ({ theme }) => {
     );
   };
 
-  const handleLike = async (id) => {
-    try {
-      const response = await fetch(`https://hacktour.onrender.com/like/${id}`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ userId }),
-      });
+  const handleLike = (id) => {
+    setHackData((prev) =>
+      prev.map((item) =>
+        item._id === id ? { ...item, likes: item.likes + 1 } : item
+      )
+    );
+  };
+  
 
-      if (response.ok) {
-        const { likes } = await response.json();
+  const handleLike = (id) => {
+    fetch(`https://hacktour.onrender.com/like/${id}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ userId }),
+    })
+      .then((res) => {
+        if (!res.ok) {
+          throw new Error('You have already liked this hack!');
+        }
+        return res.json();
+      })
+      .then((updatedHack) => {
         setHackData((prev) =>
           prev.map((item) =>
-            item._id === id ? { ...item, likes } : item
+            item._id === id ? { ...item, likes: updatedHack.likes } : item
           )
         );
-      } else {
-        alert("You already liked this entity!");
-      }
-    } catch (error) {
-      console.error("Error liking entity:", error);
-    }
+      })
+      .catch((err) => console.error(err.message));
   };
-
-  const loadMoreHacks = () => {
-    const nextPage = currentPage + 1;
-    fetchHacks(nextPage);
-    setCurrentPage(nextPage);
-  };
+  
 
   const breakpointColumnsObj = {
     default: 3,
