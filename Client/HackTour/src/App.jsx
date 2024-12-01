@@ -3,7 +3,6 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import Home from './components/Home';
 import Account from './components/Account';
-
 function App() {
   const [theme, setTheme] = useState('light');
   const [user, setUser] = useState(null);
@@ -37,6 +36,7 @@ function App() {
 
   return (
     <Router>
+ 
       <div className={`min-h-screen transition duration-500 ${theme === 'dark' ? 'bg-gray-900 text-white' : 'bg-white text-gray-800'}`}>
         <Navbar 
           user={user} 
@@ -45,18 +45,18 @@ function App() {
           onSignOut={handleSignOut} 
         />
         <Routes>
-        <Route 
+         
+          <Route 
             path="/" 
             element={user ? <Home user={user} theme={theme} /> : <Account setUser={setUser} />} 
           />
           <Route 
             path="/account" 
-            element={<Account setUser={setUser} />} 
+            element={<Account user={user} setUser={setUser} />} 
           />
         </Routes>
       </div>
     </Router>
   );
 }
-
 export default App;

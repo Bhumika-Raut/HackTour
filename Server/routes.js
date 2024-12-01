@@ -105,10 +105,9 @@ router.post('/login', async (req, res) => {
     }
 });
 
-// Like an entity (POST request)
 router.post('/like/:id', async (req, res) => {
-    const { userId } = req.body; // Get userId from request
-    const { id } = req.params; // Entity ID
+    const { userId } = req.body; 
+    const { id } = req.params;  
 
     try {
         const randomEntity = await RandomEntity.findById(id);
@@ -116,31 +115,23 @@ router.post('/like/:id', async (req, res) => {
             return res.status(404).send({ message: 'Entity not found' });
         }
 
-        const user = await Account.findById(userId);
-        if (!user) {
-            return res.status(404).send({ message: 'User not found' });
-        }
-
         if (randomEntity.likedBy.includes(userId)) {
-            return res.status(400).send({ message: 'You already liked this entity' });
+            return res.status(400).send({ message: 'You have already liked this entity!' });
         }
 
-        // Add user to the likedBy array in the RandomEntity
         randomEntity.likedBy.push(userId);
         randomEntity.likes += 1;
+
         await randomEntity.save();
 
-        // Add entity to the user's likedEntities
-        user.likedEntities.push(id);
-        await user.save();
-
-        res.status(200).send({ message: 'Entity liked successfully', likes: randomEntity.likes });
-    } catch (error) {
-        res.status(500).send({ message: 'Server error', error });
+        res.status(200).send({ likes: randomEntity.likes });
+    } catch (err) {
+        console.error('Error liking entity:', err);
+        res.status(500).json({ error: 'Internal Server Error' });
     }
 });
 
-// Get all liked entities for a user (GET request)
+
 router.get('/account/liked-entities/:userId', async (req, res) => {
     const { userId } = req.params;
 

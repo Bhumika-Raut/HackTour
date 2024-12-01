@@ -18,6 +18,7 @@ const Home = ({ theme }) => {
   const [hasMore, setHasMore] = useState(true);
   const hacksPerPage = 6;
   const navigate = useNavigate();
+  const userId = "USER_ID";
 
   useEffect(() => {
     fetchHacks();
@@ -76,7 +77,7 @@ const Home = ({ theme }) => {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ userId: "USER_ID" }),
+        body: JSON.stringify({ userId }),
       });
 
       if (response.ok) {
@@ -103,31 +104,26 @@ const Home = ({ theme }) => {
   const breakpointColumnsObj = {
     default: 3,
     1100: 2,
-    700: 1,
+    700: 1
   };
 
   return (
-    <div
-      className={`min-h-screen transition duration-500 ${
-        theme === "dark" ? "bg-gray-900 text-white" : "bg-white text-gray-800"
-      }`}
-    >
-      <Header searchTerm={searchTerm} setSearchTerm={setSearchTerm} theme={theme} />
-      <motion.div
-        className="max-w-6xl mx-auto p-6"
-        initial={{ y: 20, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        transition={{ delay: 0.2 }}
-      >
+    <div className={`min-h-screen transition duration-500 ${theme === "dark" ? "bg-gray-900 text-white" : "bg-white text-gray-800"}`}>
+  <Header searchTerm={searchTerm} setSearchTerm={setSearchTerm} theme={theme} />
+  <motion.div
+    className="max-w-6xl mx-auto p-6"
+    initial={{ y: 20, opacity: 0 }}
+    animate={{ y: 0, opacity: 1 }}
+    transition={{ delay: 0.2 }}
+  >
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-4xl font-bold">HackTour</h1>
           <button
-  onClick={() => setFormVisible(!formVisible)}
-  className="px-4 py-2 bg-gradient-to-r from-teal-700 via-teal-800 to-gray-900 hover:from-teal-800 hover:via-teal-900 hover:to-black text-white rounded-lg"
->
-  {formVisible ? "Cancel" : "Add Hack"}
-</button>
-
+            onClick={() => setFormVisible(!formVisible)}
+            className="px-4 py-2 bg-green-600 hover:bg-green-500 rounded-lg"
+          >
+            {formVisible ? "Cancel" : "Add Hack"}
+          </button>
         </div>
         {formVisible && (
           <Form
@@ -167,30 +163,26 @@ const Home = ({ theme }) => {
 
 const Header = ({ searchTerm, setSearchTerm, theme }) => (
   <motion.div
-    className={`py-4 px-6 sticky top-0 z-10 shadow-md ${
-      theme === "dark" ? "bg-gray-800" : "bg-gray-200"
-    }`}
+    className={`py-4 px-6 sticky top-0 z-10 shadow-md ${theme === "dark" ? "bg-gray-800" : "bg-gray-200"}`}
     initial={{ y: -50, opacity: 0 }}
     animate={{ y: 0, opacity: 1 }}
     transition={{ duration: 0.5 }}
   >
     <input
-      type="text"
-      placeholder="Search hacks..."
-      value={searchTerm}
-      onChange={(e) => setSearchTerm(e.target.value)}
-      className="w-full p-2 mb-6 rounded-md border border-gray-300 focus:ring-2 focus:ring-indigo-500"
-    />
+  type="text"
+  placeholder="Search hacks..."
+  value={searchTerm}
+  onChange={(e) => setSearchTerm(e.target.value)}
+  className="w-full p-2 mb-6 rounded-md border border-gray-300 focus:ring-2 focus:ring-indigo-500"
+/>
+
   </motion.div>
 );
-
 
 const Form = ({ newHack, handleInputChange, handleSubmit, theme }) => (
   <motion.form
     onSubmit={handleSubmit}
-    className={`p-6 rounded-lg mb-6 ${
-      theme === "dark" ? "bg-gray-700" : "bg-gray-100"
-    }`}
+    className={`p-6 rounded-lg mb-6 ${theme === "dark" ? "bg-gray-700" : "bg-gray-100"}`}
     initial={{ opacity: 0 }}
     animate={{ opacity: 1 }}
     transition={{ duration: 0.5 }}
@@ -226,9 +218,8 @@ const Form = ({ newHack, handleInputChange, handleSubmit, theme }) => (
     </div>
     <button
       type="submit"
-      className="px-4 py-2 bg-gradient-to-r from-purple-700 via-indigo-800 to-gray-900 hover:from-indigo-700 hover:via-purple-900 hover:to-black text-white rounded-lg"
->
-    
+      className="px-4 py-2 bg-green-600 hover:bg-green-500 rounded-lg"
+    >
       Add Hack
     </button>
   </motion.form>
@@ -236,9 +227,7 @@ const Form = ({ newHack, handleInputChange, handleSubmit, theme }) => (
 
 const HackCard = ({ hack, toggleDescription, handleLike, theme }) => (
   <motion.div
-    className={`rounded-lg shadow-md p-4 ${
-      theme === "dark" ? "bg-gray-800" : "bg-white"
-    }`}
+    className={`rounded-lg shadow-md p-4 ${theme === "dark" ? "bg-gray-800" : "bg-white"}`}
     whileHover={{ scale: 1.05 }}
   >
     <img src={hack.image} alt={hack.title} className="w-full rounded-lg mb-4" />
@@ -252,12 +241,11 @@ const HackCard = ({ hack, toggleDescription, handleLike, theme }) => (
         {hack.isDescriptionVisible ? "Hide Description" : "Show Description"}
       </button>
       <button
-  onClick={() => handleLike(hack._id)}
-  className="px-4 py-2 bg-gradient-to-r from-gray-700 via-gray-800 to-black hover:from-gray-800 hover:via-black hover:to-gray-900 text-white rounded-lg"
->
-  Like ({hack.likes})
-</button>
-
+        onClick={() => handleLike(hack._id)}
+        className="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-lg"
+      >
+        Like ({hack.likes})
+      </button>
     </div>
   </motion.div>
 );
