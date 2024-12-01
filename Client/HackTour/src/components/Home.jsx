@@ -71,15 +71,6 @@ const Home = ({ theme }) => {
   };
 
   const handleLike = (id) => {
-    setHackData((prev) =>
-      prev.map((item) =>
-        item._id === id ? { ...item, likes: item.likes + 1 } : item
-      )
-    );
-  };
-  
-
-  const handleLike = (id) => {
     fetch(`https://hacktour.onrender.com/like/${id}`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -100,7 +91,12 @@ const Home = ({ theme }) => {
       })
       .catch((err) => console.error(err.message));
   };
-  
+
+  const loadMoreHacks = () => {
+    const nextPage = currentPage + 1;
+    fetchHacks(nextPage);
+    setCurrentPage(nextPage);
+  };
 
   const breakpointColumnsObj = {
     default: 3,
@@ -110,13 +106,13 @@ const Home = ({ theme }) => {
 
   return (
     <div className={`min-h-screen transition duration-500 ${theme === "dark" ? "bg-gray-900 text-white" : "bg-white text-gray-800"}`}>
-  <Header searchTerm={searchTerm} setSearchTerm={setSearchTerm} theme={theme} />
-  <motion.div
-    className="max-w-6xl mx-auto p-6"
-    initial={{ y: 20, opacity: 0 }}
-    animate={{ y: 0, opacity: 1 }}
-    transition={{ delay: 0.2 }}
-  >
+      <Header searchTerm={searchTerm} setSearchTerm={setSearchTerm} theme={theme} />
+      <motion.div
+        className="max-w-6xl mx-auto p-6"
+        initial={{ y: 20, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ delay: 0.2 }}
+      >
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-4xl font-bold">HackTour</h1>
           <button
@@ -170,13 +166,12 @@ const Header = ({ searchTerm, setSearchTerm, theme }) => (
     transition={{ duration: 0.5 }}
   >
     <input
-  type="text"
-  placeholder="Search hacks..."
-  value={searchTerm}
-  onChange={(e) => setSearchTerm(e.target.value)}
-  className="w-full p-2 mb-6 rounded-md border border-gray-300 focus:ring-2 focus:ring-indigo-500"
-/>
-
+      type="text"
+      placeholder="Search hacks..."
+      value={searchTerm}
+      onChange={(e) => setSearchTerm(e.target.value)}
+      className="w-full p-2 mb-6 rounded-md border border-gray-300 focus:ring-2 focus:ring-indigo-500"
+    />
   </motion.div>
 );
 

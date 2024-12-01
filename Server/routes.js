@@ -105,6 +105,7 @@ router.post('/login', async (req, res) => {
     }
 });
 
+// Like a Random Entity (POST request)
 router.post('/like/:id', async (req, res) => {
     const { userId } = req.body; 
     const { id } = req.params;  
@@ -131,8 +132,7 @@ router.post('/like/:id', async (req, res) => {
     }
 });
 
-
-
+// Fetch liked entities for a user
 router.get('/account/liked-entities/:userId', async (req, res) => {
     const { userId } = req.params;
 
