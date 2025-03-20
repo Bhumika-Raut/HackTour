@@ -23,16 +23,27 @@ const Home = ({ theme }) => {
   useEffect(() => {
     fetchHacks();
   }, []);
+  useEffect(() => {
+    if (searchTerm.trim() === "") {
+      fetchHacks(1); 
+    }
+  }, [searchTerm]);
+  
 
-  const fetchHacks = (page = 1) => {
-    fetch(`https://hacktour.onrender.com/home?page=${page}&limit=${hacksPerPage}`)
+  const fetchHacks = (page = 1, search = "") => {
+    fetch(`https://hacktour.onrender.com/home?page=${page}&limit=${hacksPerPage}&search=${search}`)
       .then((res) => res.json())
       .then((data) => {
-        setHackData((prev) => [...prev, ...data]);
+        if (page === 1) {
+          setHackData(data); 
+        } else {
+          setHackData((prev) => [...prev, ...data]);
+        }
         setHasMore(data.length > 0);
       })
       .catch((err) => console.error(err));
   };
+  
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -60,15 +71,16 @@ const Home = ({ theme }) => {
     item.title.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const toggleDescription = (index) => {
+  const toggleDescription = (id) => {
     setHackData((prev) =>
-      prev.map((item, i) =>
-        i === index
+      prev.map((item) =>
+        item._id === id
           ? { ...item, isDescriptionVisible: !item.isDescriptionVisible }
           : item
       )
     );
   };
+  
 
   const handleLike = (id) => {
     fetch(`https://hacktour.onrender.com/like/${id}`, {
@@ -105,7 +117,7 @@ const Home = ({ theme }) => {
   };
 
   return (
-    <div className={`min-h-screen transition duration-500 ${theme === "dark" ? "bg-gray-900 text-white" : "bg-white text-gray-800"}`}>
+    <div className={`min-h-screen transition duration-500 ${theme === "dark" ? "bg-gray-900 text-white" : "bg-white text-white"}`}>
       <Header searchTerm={searchTerm} setSearchTerm={setSearchTerm} theme={theme} />
       <motion.div
         className="max-w-6xl mx-auto p-6"
@@ -117,7 +129,7 @@ const Home = ({ theme }) => {
           <h1 className="text-4xl font-bold">HackTour</h1>
           <button
             onClick={() => setFormVisible(!formVisible)}
-            className="px-4 py-2 bg-green-600 hover:bg-green-500 rounded-lg"
+            className="px-4 py-2 text-white rounded-lg bg-gradient-to-r from-green-700 to-gray-900"
           >
             {formVisible ? "Cancel" : "Add Hack"}
           </button>
@@ -144,12 +156,13 @@ const Home = ({ theme }) => {
           >
             {filteredHacks.map((hack, index) => (
               <HackCard
-                key={hack._id}
-                hack={hack}
-                toggleDescription={toggleDescription}
-                handleLike={handleLike}
-                theme={theme}
-              />
+              key={hack._id}
+              hack={hack}
+              toggleDescription={() => toggleDescription(hack._id)}
+              handleLike={handleLike}
+              theme={theme}
+            />
+            
             ))}
           </Masonry>
         </InfiniteScroll>
@@ -214,35 +227,26 @@ const Form = ({ newHack, handleInputChange, handleSubmit, theme }) => (
     </div>
     <button
       type="submit"
-      className="px-4 py-2 bg-green-600 hover:bg-green-500 rounded-lg"
-    >
+      className="px-4 py-2 text-white rounded-lg bg-gradient-to-r from-green-700 to-gray-900">
       Add Hack
     </button>
   </motion.form>
 );
 
-const HackCard = ({ hack, toggleDescription, handleLike, theme }) => (
+const HackCard = ({ hack, toggleDescription }) => (
   <motion.div
-    className={`rounded-lg shadow-md p-4 ${theme === "dark" ? "bg-gray-800" : "bg-white"}`}
+    className="rounded-lg shadow-md p-4 bg-gray-800"
     whileHover={{ scale: 1.05 }}
   >
     <img src={hack.image} alt={hack.title} className="w-full rounded-lg mb-4" />
     <h2 className="text-xl font-semibold">{hack.title}</h2>
-    <p className="text-sm">{hack.description}</p>
-    <div className="flex justify-between items-center mt-4">
-      <button
-        onClick={() => toggleDescription(hack._id)}
-        className="text-indigo-600 hover:text-indigo-400"
-      >
-        {hack.isDescriptionVisible ? "Hide Description" : "Show Description"}
-      </button>
-      <button
-        onClick={() => handleLike(hack._id)}
-        className="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-lg"
-      >
-        Like ({hack.likes})
-      </button>
-    </div>
+    {hack.isDescriptionVisible && <p className="text-sm">{hack.description}</p>}
+    <button
+      onClick={() => toggleDescription(hack._id)}
+      className="text-indigo-400 hover:text-indigo-300 mt-2"
+    >
+      {hack.isDescriptionVisible ? "Hide Description" : "Show Description"}
+    </button>
   </motion.div>
 );
 

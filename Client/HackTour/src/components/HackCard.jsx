@@ -19,7 +19,7 @@ const HackCard = ({ hack, index, toggleDescription }) => {
       </div>
       <h2 className="text-2xl text-white font-bold mt-4">{hack.title}</h2>
       <p
-        className={`text-gray-400 text-sm mt-2 ${
+        className={`text-white-400 text-sm mt-2 ${
           hack.isDescriptionVisible ? "" : "line-clamp-3"
         } transition-all duration-300`}
       >

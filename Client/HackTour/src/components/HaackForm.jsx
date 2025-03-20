@@ -46,11 +46,10 @@ const HackForm = ({ newHack, handleInputChange, handleSubmit }) => {
         required
       />
       <button
-        type="submit"
-        className="px-6 py-2 bg-blue-500 text-white rounded-full hover:bg-blue-600 transition"
-      >
-        Add Hack
-      </button>
+      type="submit"
+      className="px-4 py-2 text-white rounded-lg bg-gradient-to-r from-green-700 to-gray-900">
+      Add Hack
+    </button>
     </motion.form>
   );
 };

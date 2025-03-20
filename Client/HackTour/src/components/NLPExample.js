@@ -38,7 +38,7 @@ function NLPExample() {
                 <h3 className="font-semibold">Tokens:</h3>
                 <ul>
                     {tokens.map((token, index) => (
-                        <li key={index} className="text-gray-700">
+                        <li key={index} className="text-white-700">
                             {token}
                         </li>
                     ))}
